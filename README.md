@@ -143,7 +143,7 @@ one GitHub Personal Access Token. Full walkthrough:
 pnpm install
 
 # 1. Create the KV namespace and paste its id into wrangler.toml
-wrangler kv namespace create CARD_CACHE
+wrangler kv namespace create CACHE
 
 # 2. Add one or more GitHub tokens as secrets (rotation across all of them)
 wrangler secret put PAT_1

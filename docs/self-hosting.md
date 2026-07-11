@@ -32,12 +32,13 @@ Tokens are **secrets** — never commit them. They live only in Wrangler secrets
 The hot cache stores each rendered card (SVG + ETag + timestamp).
 
 ```bash
-wrangler kv namespace create CARD_CACHE
-wrangler kv namespace create CARD_CACHE --preview
+wrangler kv namespace create CACHE
+wrangler kv namespace create CACHE --preview
 ```
 
-Copy the printed `id` and `preview_id` into `wrangler.toml` under the
-`[[kv_namespaces]]` block, replacing the `REPLACE_WITH_...` placeholders.
+Copy the printed `id` into `wrangler.toml`'s `[[kv_namespaces]]` block (`id`),
+and the `--preview` one into `preview_id`. Local `wrangler dev` simulates KV, so
+you can reuse the same id for both until you want a separate preview store.
 
 ## 4. Set your tokens
 

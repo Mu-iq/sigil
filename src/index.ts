@@ -72,7 +72,7 @@ function buildCardDeps(env: Env, waitUntil: (p: Promise<unknown>) => void) {
   const tokens = collectTokens(env as unknown as Record<string, unknown>);
   return {
     pool: new TokenPool(tokens),
-    cache: new KvCardCache(env.CARD_CACHE),
+    cache: new KvCardCache(env.CACHE),
     cacheSeconds: intVar(env.CACHE_SECONDS, 21600),
     staleSeconds: intVar(env.STALE_SECONDS, 86400),
     timeoutMs: intVar(env.GITHUB_TIMEOUT_MS, 8000),

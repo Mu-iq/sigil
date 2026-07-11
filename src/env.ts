@@ -5,7 +5,7 @@
  */
 export interface Env {
   /** Hot cache namespace for rendered cards. */
-  CARD_CACHE: KVNamespace;
+  CACHE: KVNamespace;
 
   // --- vars (wrangler.toml [vars]) ---
   CACHE_SECONDS?: string;
