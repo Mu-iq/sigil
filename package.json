@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc -p action/tsconfig.json",
+    "action": "tsx action/render.ts"
   },
   "dependencies": {
     "hono": "^4.6.14",
@@ -23,11 +24,13 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260702.1",
+    "@types/node": "^20",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.4.2",
+    "tsx": "^4",
     "typescript": "^5.7.2",
     "vitest": "2.1.8",
     "wrangler": "^3.114.17"
