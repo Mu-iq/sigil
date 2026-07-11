@@ -15,8 +15,8 @@ compatibility_flags = ["nodejs_compat"]
 # same id is fine to reuse until you want a separate preview store).
 [[kv_namespaces]]
 binding = "CACHE"
-id = "f9b1409ca65c4130b1be033ab0ce2c68"
-preview_id = "f9b1409ca65c4130b1be033ab0ce2c68"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+preview_id = "REPLACE_WITH_KV_PREVIEW_ID"
 
 # Historical store for snapshots + precomputed AI summaries.
 # Create with: wrangler d1 create sigil
