@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
-import { handleStats, type StatsDeps } from './cards/stats/index.js';
+import { handleLanguages } from './cards/languages/index.js';
+import { handleStats } from './cards/stats/index.js';
 import { KvCardCache } from './cache/kv.js';
 import { collectTokens, intVar, type Env } from './env.js';
 import { TokenPool } from './github/token-pool.js';
@@ -13,22 +14,31 @@ app.get('/health', (c) => {
   return c.json({
     ok: true,
     service: 'sigil',
-    version: '0.1.0',
+    version: '0.2.0',
     tokensConfigured: tokens.length,
     time: new Date().toISOString(),
   });
 });
 
 app.get('/api/stats', async (c) => {
-  const deps = buildStatsDeps(c.env, (p) => c.executionCtx.waitUntil(p));
+  const deps = buildCardDeps(c.env, (p) => c.executionCtx.waitUntil(p));
   return handleStats(c.req.raw, deps);
+});
+
+app.get('/api/languages', async (c) => {
+  const deps = buildCardDeps(c.env, (p) => c.executionCtx.waitUntil(p));
+  return handleLanguages(c.req.raw, deps);
 });
 
 app.get('/', (c) =>
   c.json({
     service: 'sigil',
     docs: 'https://github.com/Mu-iq/sigil',
-    endpoints: ['/health', '/api/stats?username=<login>'],
+    endpoints: [
+      '/health',
+      '/api/stats?username=<login>',
+      '/api/languages?username=<login>',
+    ],
   }),
 );
 
@@ -43,7 +53,8 @@ app.onError((_err, c) => {
   return c.json({ ok: false, error: 'internal error' }, 500);
 });
 
-function buildStatsDeps(env: Env, waitUntil: (p: Promise<unknown>) => void): StatsDeps {
+/** Build the shared per-request card dependencies (pool + cache + config). */
+function buildCardDeps(env: Env, waitUntil: (p: Promise<unknown>) => void) {
   const tokens = collectTokens(env as unknown as Record<string, unknown>);
   return {
     pool: new TokenPool(tokens),

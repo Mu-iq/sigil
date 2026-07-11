@@ -1,11 +1,9 @@
 import { resolveBackground } from '../../render/background.js';
+import { FONT_STACK } from '../../render/constants.js';
 import { STAT_ICON_PATHS } from '../../render/icons.js';
 import type { Theme } from '../../themes/index.js';
 import { escapeXml } from '../../util/xml.js';
 import type { StatsCardModel } from './transform.js';
-
-const FONT_STACK =
-  "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif";
 
 export interface RenderOptions {
   hideBorder: boolean;

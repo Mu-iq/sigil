@@ -54,6 +54,66 @@ export const STATS_QUERY = /* GraphQL */ `
   }
 `;
 
+/**
+ * GraphQL query for the languages card. Pages ALL owned non-fork repos and
+ * reads each repo's language breakdown by bytes. Fixing the "first 100 repos"
+ * bug means paging `repositories`; reading `languages(orderBy: SIZE)` edges is
+ * how GitHub exposes per-repo byte counts. `primaryLanguage`/`isPrivate` let us
+ * offer count-weighting and private handling. All fields verified against the
+ * Repository/Language schema.
+ */
+export const LANGUAGES_QUERY = /* GraphQL */ `
+  query userLanguages($login: String!, $after: String) {
+    user(login: $login) {
+      login
+      repositories(
+        first: 100
+        after: $after
+        ownerAffiliations: OWNER
+        isFork: false
+        orderBy: { field: PUSHED_AT, direction: DESC }
+      ) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          name
+          isPrivate
+          languages(first: 15, orderBy: { field: SIZE, direction: DESC }) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export interface LanguageEdge {
+  size: number;
+  node: { name: string; color: string | null };
+}
+
+export interface LanguagesQueryResult {
+  user: {
+    login: string;
+    repositories: {
+      pageInfo: { hasNextPage: boolean; endCursor: string | null };
+      nodes: Array<{
+        name: string;
+        isPrivate: boolean;
+        languages: { edges: LanguageEdge[] };
+      }>;
+    };
+  } | null;
+}
+
 /** Shape returned by STATS_QUERY. Mirrors the query exactly. */
 export interface StatsQueryResult {
   user: {

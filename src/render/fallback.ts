@@ -1,9 +1,7 @@
 import { resolveTheme, type Theme } from '../themes/index.js';
 import { escapeXml } from '../util/xml.js';
 import { resolveBackground } from './background.js';
-
-const FONT_STACK =
-  "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif";
+import { FONT_STACK } from './constants.js';
 
 /**
  * The minimal branded "temporarily unavailable" card. This is the last line of

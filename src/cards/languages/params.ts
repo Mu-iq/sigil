@@ -1,26 +1,25 @@
 import type { ThemeOverrides } from '../../themes/index.js';
 import { ParamError } from '../params-error.js';
-import { ALL_STAT_KEYS, type StatKey } from './transform.js';
+import type { LanguagesLayout } from './render.js';
+import type { LanguageWeight } from './types.js';
 
-export { ParamError };
-
-/** Everything the stats endpoint needs, validated and normalized. */
-export interface StatsParams {
+export interface LanguagesParams {
   username: string;
   theme: string;
   overrides: ThemeOverrides;
-  show: StatKey[] | undefined;
-  hide: StatKey[] | undefined;
-  showIcons: boolean;
-  countPrivate: boolean;
-  hideRank: boolean;
+  layout: LanguagesLayout;
+  weight: LanguageWeight;
+  langsCount: number;
+  excludeRepos: string[] | undefined;
+  hideLanguages: string[] | undefined;
+  includePrivate: boolean;
   hideBorder: boolean;
   borderRadius: number;
   title: string | undefined;
 }
 
 const USERNAME_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
-const STAT_KEY_SET = new Set<string>(ALL_STAT_KEYS);
+const LAYOUTS = new Set<LanguagesLayout>(['normal', 'compact', 'donut']);
 
 function parseBool(raw: string | undefined, fallback: boolean): boolean {
   if (raw === undefined) return fallback;
@@ -30,25 +29,32 @@ function parseBool(raw: string | undefined, fallback: boolean): boolean {
   return fallback;
 }
 
-function parseKeys(raw: string | undefined): StatKey[] | undefined {
+function parseList(raw: string | undefined): string[] | undefined {
   if (!raw) return undefined;
-  const keys = raw
+  const items = raw
     .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter((s): s is StatKey => STAT_KEY_SET.has(s));
-  return keys.length > 0 ? keys : undefined;
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+    .slice(0, 50); // bound input
+  return items.length > 0 ? items : undefined;
 }
 
-/**
- * Parse + validate query params at the boundary. Throws ParamError only for a
- * missing/invalid username (the one thing we can't render without); every other
- * param falls back to a sane default so a typo never breaks the card.
- */
-export function parseStatsParams(q: URLSearchParams): StatsParams {
+export function parseLanguagesParams(q: URLSearchParams): LanguagesParams {
   const username = (q.get('username') ?? '').trim();
   if (!USERNAME_RE.test(username)) {
     throw new ParamError('Missing or invalid "username"');
   }
+
+  const layoutRaw = (q.get('layout') ?? 'normal').trim().toLowerCase();
+  const layout = LAYOUTS.has(layoutRaw as LanguagesLayout)
+    ? (layoutRaw as LanguagesLayout)
+    : 'normal';
+
+  const weight: LanguageWeight = q.get('weight') === 'count' ? 'count' : 'size';
+
+  const countRaw = q.get('langs_count');
+  const count = countRaw ? Number(countRaw) : 6;
+  const langsCount = Number.isFinite(count) ? Math.max(1, Math.min(12, count)) : 6;
 
   const radiusRaw = q.get('border_radius');
   const radius = radiusRaw ? Number(radiusRaw) : 8;
@@ -68,31 +74,34 @@ export function parseStatsParams(q: URLSearchParams): StatsParams {
       border_color: q.get('border_color') ?? undefined,
       accent_color: q.get('accent_color') ?? undefined,
     },
-    show: parseKeys(q.get('show') ?? undefined),
-    hide: parseKeys(q.get('hide') ?? undefined),
-    showIcons: parseBool(q.get('show_icons') ?? undefined, true),
-    countPrivate: parseBool(q.get('count_private') ?? undefined, false),
-    hideRank: parseBool(q.get('hide_rank') ?? undefined, false),
+    layout,
+    weight,
+    langsCount,
+    excludeRepos: parseList(q.get('exclude_repo') ?? undefined),
+    hideLanguages: parseList(q.get('hide') ?? undefined),
+    includePrivate: parseBool(q.get('include_private') ?? undefined, false),
     hideBorder: parseBool(q.get('hide_border') ?? undefined, false),
     borderRadius,
-    // Cap title length to keep the SVG bounded; escaping happens at render.
     title: title ? title.slice(0, 60) : undefined,
   };
 }
 
-/**
- * Build the normalized cache key from parsed params. Equivalent URLs (param
- * order/casing) must map to the same key, so we serialize a canonical subset.
- */
-export function statsCacheKey(p: StatsParams): string {
+export function languagesCacheKey(p: LanguagesParams): string {
   const parts: string[] = [
     `u=${p.username.toLowerCase()}`,
     `theme=${p.theme}`,
-    `show=${(p.show ?? []).join('.')}`,
-    `hide=${(p.hide ?? []).join('.')}`,
-    `icons=${p.showIcons ? 1 : 0}`,
-    `priv=${p.countPrivate ? 1 : 0}`,
-    `rank=${p.hideRank ? 0 : 1}`,
+    `layout=${p.layout}`,
+    `weight=${p.weight}`,
+    `n=${p.langsCount}`,
+    `xrepo=${(p.excludeRepos ?? [])
+      .map((s) => s.toLowerCase())
+      .sort()
+      .join('.')}`,
+    `hide=${(p.hideLanguages ?? [])
+      .map((s) => s.toLowerCase())
+      .sort()
+      .join('.')}`,
+    `priv=${p.includePrivate ? 1 : 0}`,
     `border=${p.hideBorder ? 0 : 1}`,
     `radius=${p.borderRadius}`,
     `title=${p.title ?? ''}`,
@@ -100,5 +109,5 @@ export function statsCacheKey(p: StatsParams): string {
   for (const [k, v] of Object.entries(p.overrides)) {
     if (v) parts.push(`${k}=${v}`);
   }
-  return `card:stats:${parts.join('|')}`;
+  return `card:languages:${parts.join('|')}`;
 }

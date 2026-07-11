@@ -4,10 +4,10 @@ Dynamically generated, always-reliable **SVG stat cards** for your GitHub
 profile README — stats, streaks, languages, activity, trends, and more, with one
 consistent theme system. Self-hostable on the edge (Cloudflare Workers).
 
-> **Status: M1 (MVP).** The stats card, theming foundation, token pool, KV
-> caching, and the never-broken-image fallback are in place and runnable.
-> Languages, streak, activity, trends, wrapped, AI summary, and the visual
-> configurator land in later milestones — see [Roadmap](#roadmap).
+> **Status: M2 (in progress).** The stats and top-languages cards, the theme
+> library, token pool, KV caching, and the never-broken-image fallback are in
+> place and runnable. Streak, activity, trends, wrapped, AI summary, and the
+> visual configurator land in later milestones — see [Roadmap](#roadmap).
 
 ---
 
@@ -25,8 +25,8 @@ failure modes:
 - **Reliable by design.** Multi-token rotation + edge KV cache +
   stale-while-revalidate mean self-hosters effectively never hit GitHub's
   ~5,000 points/hour/token limit.
-- **Correct numbers.** Star totals and (soon) language stats **paginate all
-  repos** instead of stopping at the first 100.
+- **Correct numbers.** Star totals and language stats **paginate all repos**
+  instead of stopping at the first 100.
 - **One consistent design** across every card type.
 
 ---
@@ -48,7 +48,7 @@ private.
 | Param           | Default   | Description                                                                       |
 | --------------- | --------- | --------------------------------------------------------------------------------- |
 | `username`      | _(req'd)_ | GitHub login to render.                                                           |
-| `theme`         | `default` | Built-in theme name (`default`, `dark`, `light`).                                 |
+| `theme`         | `default` | Built-in theme name (see [Themes](#themes)).                                      |
 | `show`          | _(all)_   | Comma list to show, in order: `stars,commits,prs,issues,contributions,followers`. |
 | `hide`          | –         | Comma list of the same keys to hide.                                              |
 | `show_icons`    | `true`    | Show the per-stat icons.                                                          |
@@ -58,12 +58,44 @@ private.
 | `border_radius` | `8`       | Corner radius (0–24).                                                             |
 | `title`         | –         | Custom card title (max 60 chars).                                                 |
 
+\* Private counts require a token that can see them (see self-hosting).
+
+### Top languages card (`/api/languages`)
+
+Paginates **all** your owned non-fork repos (no 100-repo cap) and aggregates
+language bytes across them.
+
+```md
+![Top languages](https://<your-instance>.workers.dev/api/languages?username=Mu-iq&layout=donut&theme=tokyonight)
+```
+
+| Param             | Default   | Description                                                             |
+| ----------------- | --------- | ----------------------------------------------------------------------- |
+| `username`        | _(req'd)_ | GitHub login to render.                                                 |
+| `theme`           | `default` | Built-in theme name (see [Themes](#themes)).                            |
+| `layout`          | `normal`  | `normal` (bars), `compact` (stacked bar + legend), or `donut` (ring).   |
+| `weight`          | `size`    | `size` weights by bytes; `count` weights by number of repos.            |
+| `langs_count`     | `6`       | Max languages before the rest collapse into "Other" (1–12).             |
+| `hide`            | –         | Comma list of language names to hide (e.g. `hide=html,css`).            |
+| `exclude_repo`    | –         | Comma list of repo names to exclude from the aggregate.                 |
+| `include_private` | `false`   | Include private repos' languages (needs a token that can see them).\*\* |
+| `hide_border`     | `false`   | Hide the card border.                                                   |
+| `border_radius`   | `8`       | Corner radius (0–24).                                                   |
+| `title`           | –         | Custom card title (max 60 chars).                                       |
+
+\*\* Language stats reflect the bytes in _your own_ repos, not contributions to
+others — a GitHub API limitation shared by every tool in this category.
+
+### Themes
+
+Built-in: `default`, `dark`, `light`, `github_dark`, `tokyonight`, `dracula`,
+`gruvbox`, `catppuccin`, `radical`. One theme applies consistently across every
+card.
+
 **Custom theming** (all validated as hex; invalid values are ignored):
 `title_color`, `text_color`, `muted_color`, `icon_color`, `border_color`,
 `accent_color`, and `bg_color` — which accepts a solid hex, `transparent`, or a
 gradient `angle,stopA,stopB` (e.g. `bg_color=35,0d1117,161b22`).
-
-\* Private counts require a token that can see them (see self-hosting).
 
 ---
 
@@ -125,7 +157,7 @@ Vercel/Node port stays cheap.
 - **Commits** currently reflect GitHub's ~last-year contribution window
   (`totalCommitContributions`). An all-time `include_all_commits` mode arrives
   in M2.
-- **Language stats** (M2) will reflect the bytes in _your own_ repos, not your
+- **Language stats** reflect the bytes in _your own_ repos, not your
   contributions to others — a GitHub API limitation shared by every tool in this
   category.
 - Rank/percentile is a documented **heuristic** (see
@@ -155,8 +187,9 @@ invariants every change must uphold (chiefly: never return a broken image).
 
 - **M1 — MVP (done):** `/health`, `/api/stats`, theming foundation, token pool,
   KV cache + stale-while-revalidate, never-broken-image fallback.
-- **M2 — Core cards + theming:** languages (paginated), streak (tz-aware),
-  activity graph; full theme library + custom params.
+- **M2 — Core cards + theming (in progress):** languages card (paginated,
+  3 layouts) ✓ and the expanded theme library ✓; streak (tz-aware) and activity
+  graph next.
 - **M3 — Signature features:** D1 historical snapshots + cron; trend cards;
   "Year in Review / Wrapped"; precomputed AI developer summary.
 - **M4 — Adoption:** visual configurator with live preview + copy snippets;

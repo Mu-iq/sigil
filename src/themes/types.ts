@@ -25,5 +25,15 @@ export interface Theme {
 }
 
 /** Names of built-in themes. Kept as a const tuple for exhaustive handling. */
-export const BUILTIN_THEME_NAMES = ['default', 'dark', 'light'] as const;
+export const BUILTIN_THEME_NAMES = [
+  'default',
+  'dark',
+  'light',
+  'github_dark',
+  'tokyonight',
+  'dracula',
+  'gruvbox',
+  'catppuccin',
+  'radical',
+] as const;
 export type BuiltinThemeName = (typeof BUILTIN_THEME_NAMES)[number];
