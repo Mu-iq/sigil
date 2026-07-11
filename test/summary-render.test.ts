@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { renderSummaryCard } from '../src/cards/summary/render.js';
 import { resolveTheme } from '../src/themes/index.js';
 
-const OPTS = { title: 'Dev Summary', hideBorder: false, borderRadius: 8 };
+const OPTS = { title: 'Dev Summary', enabled: true, hideBorder: false, borderRadius: 8 };
 
 describe('renderSummaryCard', () => {
   it('renders a stored summary as accessible SVG', () => {
@@ -17,9 +17,18 @@ describe('renderSummaryCard', () => {
     expect(svg).not.toMatch(/<image|xlink:href|<foreignObject|@import|href="http/);
   });
 
-  it('shows a waiting state when no summary is stored', () => {
+  it('shows a waiting state when enabled but no summary is stored', () => {
     const svg = renderSummaryCard(null, resolveTheme('dark'), OPTS);
     expect(svg).toContain('after the next scheduled update');
+    expect(svg.startsWith('<svg')).toBe(true);
+  });
+
+  it('shows a clean "not enabled" state when the feature is off', () => {
+    const svg = renderSummaryCard(null, resolveTheme('dark'), {
+      ...OPTS,
+      enabled: false,
+    });
+    expect(svg).toContain('not enabled for this instance');
     expect(svg.startsWith('<svg')).toBe(true);
   });
 

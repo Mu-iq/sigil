@@ -5,6 +5,8 @@ import { escapeXml } from '../../util/xml.js';
 
 export interface SummaryRenderOptions {
   title: string;
+  /** Whether the AI summary feature is enabled for this instance. */
+  enabled: boolean;
   hideBorder: boolean;
   borderRadius: number;
 }
@@ -14,15 +16,20 @@ const PAD = 25;
 
 /**
  * Render the AI developer summary card. The summary text is model-generated and
- * therefore untrusted — it is XML-escaped and word-wrapped here. `summary` is
- * null when none has been precomputed yet (renders a friendly waiting state).
+ * therefore untrusted — it is XML-escaped and word-wrapped here. Three states:
+ * a stored summary; a waiting message (enabled but not yet generated); and a
+ * clean "not enabled" message when the operator has left the feature off.
  */
 export function renderSummaryCard(
   summary: string | null,
   theme: Theme,
   options: SummaryRenderOptions,
 ): string {
-  const body = summary ?? 'A summary will appear here after the next scheduled update.';
+  const body =
+    summary ??
+    (options.enabled
+      ? 'A summary will appear here after the next scheduled update.'
+      : 'AI summary is not enabled for this instance.');
   const lines = wrap(body, 60).slice(0, 4);
   const height = 60 + lines.length * 22 + 10;
   const { defs, fill } = resolveBackground(theme, 'sigil-summary-bg');

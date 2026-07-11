@@ -1,4 +1,9 @@
-import { createProvider, generateSummary, type SummarySignals } from '../ai/index.js';
+import {
+  resolveAiProvider,
+  generateSummary,
+  type AiProvider,
+  type SummarySignals,
+} from '../ai/index.js';
 import { fetchUserLanguages } from '../cards/languages/fetch.js';
 import { transformLanguages } from '../cards/languages/transform.js';
 import { fetchUserStats } from '../cards/stats/fetch.js';
@@ -27,7 +32,9 @@ export async function handleScheduled(env: Env): Promise<void> {
   const registry = new UserRegistry(env.CACHE);
   const store = new D1SnapshotStore(env.DB);
   const timeoutMs = intVar(env.GITHUB_TIMEOUT_MS, 8000);
-  const provider = createProvider(env.AI_PROVIDER, env.AI_MODEL, env.AI_API_KEY);
+  // null unless the summary feature is explicitly enabled AND configured, so
+  // the AI provider (and any cost) is skipped entirely by default.
+  const provider = resolveAiProvider(env);
 
   const users = await registry.list(MAX_USERS_PER_RUN);
   const capturedAt = new Date().toISOString();
@@ -62,12 +69,11 @@ export async function handleScheduled(env: Env): Promise<void> {
 async function refreshSummary(
   pool: TokenPool,
   store: D1SnapshotStore,
-  provider: ReturnType<typeof createProvider>,
+  provider: AiProvider,
   username: string,
   stats: Awaited<ReturnType<typeof fetchUserStats>>,
   timeoutMs: number,
 ): Promise<void> {
-  if (!provider) return;
   const langData = await fetchUserLanguages(
     pool,
     username,

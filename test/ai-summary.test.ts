@@ -1,7 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { buildSummaryPrompt, generateSummary } from '../src/ai/index.js';
+import {
+  aiSummaryEnabled,
+  buildSummaryPrompt,
+  generateSummary,
+  resolveAiProvider,
+} from '../src/ai/index.js';
 import { createProvider } from '../src/ai/provider.js';
+import type { Env } from '../src/env.js';
 import type { AiProvider, SummarySignals } from '../src/ai/types.js';
+
+function env(partial: Partial<Env>): Env {
+  return { CACHE: {} as KVNamespace, ...partial } as Env;
+}
 
 const SIGNALS: SummarySignals = {
   login: 'mu-iq',
@@ -62,17 +72,85 @@ describe('generateSummary', () => {
 });
 
 describe('createProvider', () => {
-  it('returns null when disabled or missing a key', () => {
-    expect(createProvider('none', 'm', 'key')).toBeNull();
-    expect(createProvider('anthropic', 'm', undefined)).toBeNull();
-    expect(createProvider('unknown', 'm', 'key')).toBeNull();
+  it('returns null for unknown provider or missing requirements', () => {
+    expect(
+      createProvider({ provider: 'none', model: 'm', apiKey: 'k', ai: undefined }),
+    ).toBeNull();
+    expect(
+      createProvider({
+        provider: 'anthropic',
+        model: 'm',
+        apiKey: undefined,
+        ai: undefined,
+      }),
+    ).toBeNull();
+    expect(
+      createProvider({ provider: 'unknown', model: 'm', apiKey: 'k', ai: undefined }),
+    ).toBeNull();
+    // workers-ai needs the AI binding, not a key
+    expect(
+      createProvider({ provider: 'workers-ai', model: 'm', apiKey: 'k', ai: undefined }),
+    ).toBeNull();
   });
 
   it('builds anthropic and openai providers with the configured model', () => {
-    const a = createProvider('anthropic', 'claude-opus-4-8', 'key');
+    const a = createProvider({
+      provider: 'anthropic',
+      model: 'claude-opus-4-8',
+      apiKey: 'k',
+      ai: undefined,
+    });
     expect(a?.name).toBe('anthropic');
     expect(a?.model).toBe('claude-opus-4-8');
-    const o = createProvider('openai', 'gpt-4o-mini', 'key');
+    const o = createProvider({
+      provider: 'openai',
+      model: 'gpt-4o-mini',
+      apiKey: 'k',
+      ai: undefined,
+    });
     expect(o?.name).toBe('openai');
+  });
+
+  it('builds a workers-ai provider from the AI binding (no key needed)', () => {
+    const fakeAi = { run: async () => ({ response: 'hi' }) } as unknown as Ai;
+    const w = createProvider({
+      provider: 'workers-ai',
+      model: '',
+      apiKey: undefined,
+      ai: fakeAi,
+    });
+    expect(w?.name).toBe('workers-ai');
+    expect(w?.model).toContain('llama');
+  });
+});
+
+describe('resolveAiProvider (opt-in gating)', () => {
+  it('is off by default — no flag means no provider', () => {
+    expect(aiSummaryEnabled(env({}))).toBe(false);
+    expect(
+      resolveAiProvider(env({ AI_PROVIDER: 'anthropic', AI_API_KEY: 'k' })),
+    ).toBeNull();
+  });
+
+  it('stays off when enabled but the provider is unconfigured', () => {
+    // Flag on, anthropic selected, but no key -> still null (never runs AI).
+    expect(
+      resolveAiProvider(env({ ENABLE_AI_SUMMARY: 'true', AI_PROVIDER: 'anthropic' })),
+    ).toBeNull();
+  });
+
+  it('activates only when the flag is true AND the provider is configured', () => {
+    const p = resolveAiProvider(
+      env({ ENABLE_AI_SUMMARY: 'true', AI_PROVIDER: 'anthropic', AI_API_KEY: 'k' }),
+    );
+    expect(p?.name).toBe('anthropic');
+  });
+
+  it('activates workers-ai with just the AI binding (no key)', () => {
+    const fakeAi = { run: async () => ({ response: 'x' }) } as unknown as Ai;
+    const p = resolveAiProvider(
+      env({ ENABLE_AI_SUMMARY: 'true', AI_PROVIDER: 'workers-ai', AI: fakeAi }),
+    );
+    expect(p?.name).toBe('workers-ai');
   });
 });

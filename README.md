@@ -131,12 +131,17 @@ pipeline (Cloudflare D1 + cron):
 - **`/api/wrapped`** — a shareable Year-in-Review (`year` param): total
   contributions, busiest month, best day, longest streak, signature language.
 - **`/api/summary`** — an AI-generated one-to-two sentence developer blurb,
-  **precomputed on the schedule** (never on the request path) via a pluggable
-  provider (Anthropic / OpenAI).
+  **precomputed on the schedule** (never on the request path).
 
 These are optional and self-hosted: see
-[docs/snapshots-and-ai.md](docs/snapshots-and-ai.md) for D1 setup, the cron, AI
-provider config, and honest cost implications.
+[docs/snapshots-and-ai.md](docs/snapshots-and-ai.md) for D1 setup and the cron.
+
+> **The AI summary is opt-in and OFF by default.** The core service and every
+> other card work with **zero AI configuration** — no key, no cost, no
+> dependency. Turn it on with `ENABLE_AI_SUMMARY = "true"` plus a provider.
+> Providers are pluggable: **Cloudflare Workers AI** (recommended — no external
+> key, runs on your own Cloudflare account), Anthropic, or OpenAI. While off,
+> `/api/summary` just renders a clean "not enabled" card.
 
 ### Themes
 

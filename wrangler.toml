@@ -37,11 +37,19 @@ crons = ["0 */6 * * *"]
 CACHE_SECONDS = "21600"        # 6h fresh
 STALE_SECONDS = "86400"        # serve stale up to 24h while revalidating
 GITHUB_TIMEOUT_MS = "8000"
-# AI developer summary. "none" disables it (no key needed, no cost). To enable,
-# set to "anthropic" or "openai" and add the AI_API_KEY secret. The summary is
-# generated only by the scheduled job, never on the request path.
-# AI_MODEL: cheap default suits a short scheduled blurb; set to "claude-opus-4-8"
-# for higher quality (see docs/ai-summary.md for cost implications).
-AI_PROVIDER = "none"
+# AI developer summary — OPT-IN and OFF by default. The core service and every
+# other card work with no AI config at all. The feature (and its scheduled
+# precompute) activates only when ENABLE_AI_SUMMARY = "true" AND the selected
+# provider is configured. It never runs on the request path.
+ENABLE_AI_SUMMARY = "false"
+# Provider: "workers-ai" (no external key — runs on this Cloudflare account, the
+# cheapest option), "anthropic", or "openai". anthropic/openai need AI_API_KEY:
+#   wrangler secret put AI_API_KEY
+AI_PROVIDER = "workers-ai"
+# Model for the chosen provider (defaults per provider if blank). workers-ai:
+# "@cf/meta/llama-3.1-8b-instruct"  ·  anthropic: "claude-haiku-4-5"
+AI_MODEL = "@cf/meta/llama-3.1-8b-instruct"
 
-AI_MODEL = "claude-haiku-4-5"
+# Required ONLY when AI_PROVIDER = "workers-ai". Uncomment to bind Workers AI:
+# [ai]
+# binding = "AI"

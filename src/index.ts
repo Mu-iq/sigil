@@ -1,4 +1,5 @@
 import { Hono, type Context } from 'hono';
+import { aiSummaryEnabled } from './ai/index.js';
 import { handleActivity } from './cards/activity/index.js';
 import { handleLanguages } from './cards/languages/index.js';
 import { handleStats } from './cards/stats/index.js';
@@ -49,7 +50,7 @@ app.get('/api/summary', (c) => {
   trackRequest(c.env, c.req.raw, waitUntil);
   const base = buildCardDeps(c.env, waitUntil);
   const store = c.env.DB ? new D1SnapshotStore(c.env.DB) : null;
-  return handleSummary(c.req.raw, { ...base, store });
+  return handleSummary(c.req.raw, { ...base, store, aiEnabled: aiSummaryEnabled(c.env) });
 });
 
 app.get('/', (c) =>

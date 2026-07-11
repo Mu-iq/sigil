@@ -44,29 +44,63 @@ line — so a fresh instance shows the collecting state for the first day or two
 
 Standard `theme` / `hide_border` / `border_radius` / `title` params also apply.
 
-## 2. Enable the AI developer summary (optional, has cost)
+## 2. Enable the AI developer summary (optional, OFF by default)
+
+> The AI summary is **entirely opt-in**. The core service and every other card
+> work with **no AI configuration at all**. Nothing AI-related runs — no cron
+> work, no cost, no external dependency — unless you turn it on. When off,
+> `/api/summary` returns a clean "AI summary is not enabled for this instance"
+> card (never an error, never a broken image).
 
 The summary is a one-to-two sentence, flattering-but-honest blurb derived from
 public signals (stats + top languages). It's generated on the schedule and
-served from store.
+served from store — **never called on the request path**.
 
-```bash
-# In wrangler.toml [vars]:
-#   AI_PROVIDER = "anthropic"   # or "openai"; "none" disables it
-#   AI_MODEL    = "claude-haiku-4-5"   # or "claude-opus-4-8" for higher quality
-# Then set the key as a secret:
-wrangler secret put AI_API_KEY
+It activates only when **both** are true: `ENABLE_AI_SUMMARY = "true"` **and**
+the selected provider is configured.
+
+### Option A — Cloudflare Workers AI (recommended, no external key)
+
+The cheapest path: it runs on your own Cloudflare account, so there's **no
+external API key** and no third-party dependency.
+
+```toml
+# wrangler.toml
+[vars]
+ENABLE_AI_SUMMARY = "true"
+AI_PROVIDER = "workers-ai"
+AI_MODEL = "@cf/meta/llama-3.1-8b-instruct"   # any Workers AI text model
+
+# Uncomment the Workers AI binding:
+[ai]
+binding = "AI"
 ```
 
-**Providers:** `anthropic` (Claude Messages API) and `openai` (Chat Completions)
-are built in, behind a small `AiProvider` interface — add others in
-[`src/ai/provider.ts`](../src/ai/provider.ts).
+That's it — no secret to set.
+
+### Option B — Anthropic or OpenAI (external key)
+
+```toml
+# wrangler.toml [vars]
+ENABLE_AI_SUMMARY = "true"
+AI_PROVIDER = "anthropic"          # or "openai"
+AI_MODEL = "claude-haiku-4-5"      # or "claude-opus-4-8" for higher quality
+```
+
+```bash
+wrangler secret put AI_API_KEY     # required for anthropic / openai
+```
+
+**Providers are pluggable** — `workers-ai`, `anthropic` (Claude Messages API),
+and `openai` (Chat Completions) are built in behind a small `AiProvider`
+interface; add more in [`src/ai/provider.ts`](../src/ai/provider.ts).
 
 **Cost implications.** One short completion per tracked user per cron run
-(≤ ~160 output tokens). With the default 6-hour cadence that's 4 calls/user/day.
-On a cheap model (e.g. Claude Haiku) this is fractions of a cent per user per
-day; on a frontier model it's higher. To reduce cost: raise the cron interval,
-switch to a cheaper `AI_MODEL`, or set `AI_PROVIDER = "none"` to disable.
+(≤ ~160 output tokens). At the default 6-hour cadence that's 4 calls/user/day.
+Workers AI is billed on your Cloudflare plan (free-tier allowances apply);
+Anthropic Haiku is fractions of a cent per user per day; a frontier model is
+higher. To reduce cost: raise the cron interval, pick a cheaper `AI_MODEL`, or
+set `ENABLE_AI_SUMMARY = "false"` to disable entirely.
 
 **Safety.** The prompt instructs the model to stay factual and public-safe; the
 output is length-capped, control-char stripped, and XML-escaped before render.

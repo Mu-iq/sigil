@@ -7,6 +7,8 @@ import { renderSummaryCard } from './render.js';
 export interface SummaryDeps extends CardDeps {
   /** Historical store (holds precomputed summaries), or null without D1. */
   store: SnapshotStore | null;
+  /** Whether the AI summary feature is enabled for this instance. */
+  aiEnabled: boolean;
 }
 
 async function buildSummarySvg(
@@ -14,9 +16,13 @@ async function buildSummarySvg(
   theme: Theme,
   deps: SummaryDeps,
 ): Promise<string> {
-  const stored = deps.store ? await deps.store.getSummary(params.username) : null;
+  // Only read the store when the feature is enabled; when off, the card is a
+  // static "not enabled" message and never touches D1 or any AI code.
+  const stored =
+    deps.aiEnabled && deps.store ? await deps.store.getSummary(params.username) : null;
   return renderSummaryCard(stored?.summary ?? null, theme, {
     title: params.title ?? `${params.username}'s Dev Summary`,
+    enabled: deps.aiEnabled,
     hideBorder: params.hideBorder,
     borderRadius: params.borderRadius,
   });

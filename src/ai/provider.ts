@@ -101,22 +101,65 @@ class OpenAiProvider implements AiProvider {
 }
 
 /**
- * Build the configured provider, or null when AI is disabled / misconfigured.
- * `provider` and `model` come from vars; the key is a secret.
+ * Cloudflare Workers AI provider. Runs on the same Cloudflare account via the
+ * `AI` binding — no external API key needed, which makes it the cheapest path
+ * for self-hosters who want the summary. Uses a text-generation model.
  */
-export function createProvider(
-  provider: string | undefined,
-  model: string | undefined,
-  apiKey: string | undefined,
-): AiProvider | null {
-  const kind = (provider ?? 'none').trim().toLowerCase();
-  if (kind === 'none' || !apiKey) return null;
-  const resolvedModel = (model ?? '').trim();
+class WorkersAiProvider implements AiProvider {
+  readonly name = 'workers-ai';
+  constructor(
+    readonly model: string,
+    private readonly binding: Ai,
+  ) {}
+
+  async complete(system: string, user: string): Promise<string | null> {
+    try {
+      // The AI binding has no per-call abort; the cron already bounds itself.
+      const result = (await this.binding.run(this.model, {
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: user },
+        ],
+      })) as { response?: string };
+      return result.response?.trim() || null;
+    } catch {
+      return null;
+    }
+  }
+}
+
+/** Requirements the configured provider needs before it can be built. */
+export interface ProviderConfig {
+  provider: string | undefined;
+  model: string | undefined;
+  apiKey: string | undefined;
+  ai: Ai | undefined;
+}
+
+/**
+ * Build the configured provider, or null when it can't be satisfied (missing
+ * key for anthropic/openai, or missing `AI` binding for workers-ai). This does
+ * NOT check the enable flag — see resolveAiProvider() for the gated entry point.
+ */
+export function createProvider(config: ProviderConfig): AiProvider | null {
+  const kind = (config.provider ?? '').trim().toLowerCase();
+  const resolvedModel = (config.model ?? '').trim();
   switch (kind) {
     case 'anthropic':
-      return new AnthropicProvider(resolvedModel || 'claude-haiku-4-5', apiKey);
+      return config.apiKey
+        ? new AnthropicProvider(resolvedModel || 'claude-haiku-4-5', config.apiKey)
+        : null;
     case 'openai':
-      return new OpenAiProvider(resolvedModel || 'gpt-4o-mini', apiKey);
+      return config.apiKey
+        ? new OpenAiProvider(resolvedModel || 'gpt-4o-mini', config.apiKey)
+        : null;
+    case 'workers-ai':
+      return config.ai
+        ? new WorkersAiProvider(
+            resolvedModel || '@cf/meta/llama-3.1-8b-instruct',
+            config.ai,
+          )
+        : null;
     default:
       return null;
   }

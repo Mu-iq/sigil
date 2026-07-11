@@ -10,16 +10,25 @@ export interface Env {
   /** Historical store for snapshots + precomputed AI summaries (optional). */
   DB?: D1Database;
 
+  /** Cloudflare Workers AI binding — only present if the operator adds [ai]. */
+  AI?: Ai;
+
   // --- vars (wrangler.toml [vars]) ---
   CACHE_SECONDS?: string;
   STALE_SECONDS?: string;
   GITHUB_TIMEOUT_MS?: string;
-  /** AI provider: "anthropic" | "openai" | "workers-ai" | "none" (default). */
+  /**
+   * Master switch for the AI developer summary. The feature (and its scheduled
+   * precompute) is OFF unless this is exactly "true" AND the selected provider's
+   * requirements are met. Every other card works with no AI config at all.
+   */
+  ENABLE_AI_SUMMARY?: string;
+  /** AI provider: "anthropic" | "openai" | "workers-ai". Ignored when disabled. */
   AI_PROVIDER?: string;
   AI_MODEL?: string;
 
   // --- secrets ---
-  /** API key for the configured AI provider (scheduled job only). */
+  /** API key for anthropic/openai providers (scheduled job only; not needed for workers-ai). */
   AI_API_KEY?: string;
 
   // --- secrets (wrangler secret put) ---
