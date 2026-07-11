@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renderSummaryCard > matches snapshot > summary-tokyonight 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" width="467" height="114" viewBox="0 0 467 114" role="img" aria-labelledby="sigil-summary-title sigil-summary-desc">
+  <title id="sigil-summary-title">Dev Summary</title>
+  <desc id="sigil-summary-desc">AI-generated developer summary, rendered by sigil</desc>
+  <defs><linearGradient id="sigil-summary-bg" x1="9.04%" y1="78.68%" x2="90.96%" y2="21.32%"><stop offset="0.0%" stop-color="#1a1b27"/><stop offset="100.0%" stop-color="#24283b"/></linearGradient></defs>
+  <rect x="0" y="0" width="467" height="114" rx="8" fill="url(#sigil-summary-bg)"/>
+  <rect x="0.5" y="0.5" width="466" height="113" rx="8" fill="none" stroke="#2a2e42"/>
+  <text x="25" y="33" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#7aa2f7">Dev Summary</text>
+  <text x="25" y="64" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" fill="#c0caf5">Prolific open-source contributor working mainly in</text>
+  <text x="25" y="86" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" fill="#c0caf5">TypeScript and Go.</text>
+</svg>"
+`;

@@ -18,8 +18,30 @@ binding = "CACHE"
 id = "f9b1409ca65c4130b1be033ab0ce2c68"
 preview_id = "f9b1409ca65c4130b1be033ab0ce2c68"
 
+# Historical store for snapshots + precomputed AI summaries.
+# Create with: wrangler d1 create sigil
+# then paste the database_id below and run the migration:
+#   wrangler d1 migrations apply DB --local   (and --remote for production)
+[[d1_databases]]
+binding = "DB"
+database_name = "sigil"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+# Scheduled snapshot + AI-summary precompute. Every 6 hours.
+[triggers]
+crons = ["0 */6 * * *"]
+
 [vars]
 # Non-secret defaults. Freshness window for a card in seconds.
 CACHE_SECONDS = "21600"        # 6h fresh
 STALE_SECONDS = "86400"        # serve stale up to 24h while revalidating
 GITHUB_TIMEOUT_MS = "8000"
+# AI developer summary. "none" disables it (no key needed, no cost). To enable,
+# set to "anthropic" or "openai" and add the AI_API_KEY secret. The summary is
+# generated only by the scheduled job, never on the request path.
+# AI_MODEL: cheap default suits a short scheduled blurb; set to "claude-opus-4-8"
+# for higher quality (see docs/ai-summary.md for cost implications).
+AI_PROVIDER = "none"
+
+AI_MODEL = "claude-haiku-4-5"

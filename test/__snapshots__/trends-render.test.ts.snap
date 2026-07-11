@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renderTrendsCard > matches snapshot > trends-dark 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" width="495" height="200" viewBox="0 0 495 200" role="img" aria-labelledby="sigil-trends-title sigil-trends-desc">
+  <title id="sigil-trends-title">Stars Trend</title>
+  <desc id="sigil-trends-desc">Stars trend from historical snapshots, rendered by sigil</desc>
+  <defs></defs>
+  <rect x="0" y="0" width="495" height="200" rx="8" fill="#0d1117"/>
+  <rect x="0.5" y="0.5" width="494" height="199" rx="8" fill="none" stroke="#30363d"/>
+  <text x="25" y="33" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#58a6ff">Stars Trend</text>
+  <text x="25" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#8b949e">Stars · now 20 · <tspan fill="#3fb950">+10</tspan> over 4 snapshots</text>
+  <defs>
+    <linearGradient id="sigil-trends-fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3fb950" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#3fb950" stop-opacity="0.02"/>
+    </linearGradient>
+  </defs>
+  <line x1="44" y1="170" x2="470" y2="170" stroke="#30363d"/>
+  <text x="38" y="75" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="9" fill="#8b949e">22</text>
+  <text x="38" y="173" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="9" fill="#8b949e">10</text>
+  <path d="M 44.0 170.0 L 186.0 137.3 L 328.0 72.0 L 470.0 88.3 L 470.0 170 L 44.0 170 Z" fill="url(#sigil-trends-fill)"/>
+  <path d="M 44.0 170.0 L 186.0 137.3 L 328.0 72.0 L 470.0 88.3" fill="none" stroke="#3fb950" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="470.0" cy="88.3" r="3" fill="#3fb950"/>
+</svg>"
+`;

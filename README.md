@@ -4,10 +4,11 @@ Dynamically generated, always-reliable **SVG stat cards** for your GitHub
 profile README — stats, streaks, languages, activity, trends, and more, with one
 consistent theme system. Self-hostable on the edge (Cloudflare Workers).
 
-> **Status: M2 (done).** Stats, top-languages, streak (tz-aware), and activity
-> cards; the theme library; token pool; KV caching; and the never-broken-image
-> fallback are all in place and runnable. Trends, wrapped, AI summary, and the
-> visual configurator land in M3–M4 — see [Roadmap](#roadmap).
+> **Status: M3 (done).** All eight card types — stats, top-languages, streak,
+> activity, **trends, wrapped, and the AI developer summary** — plus historical
+> snapshots (D1 + cron), the theme library, token pool, KV caching, and the
+> never-broken-image fallback are in place and runnable. The visual configurator
+> and GitHub Action deploy mode land in M4 — see [Roadmap](#roadmap).
 
 ---
 
@@ -120,6 +121,23 @@ A hand-rendered area/line chart of daily contributions over a selectable window.
 | `border_radius` | `8`       | Corner radius (0–24).                        |
 | `title`         | –         | Custom card title (max 60 chars).            |
 
+### Signature cards (snapshots + AI)
+
+sigil also offers cards **no other tool has**, powered by a scheduled snapshot
+pipeline (Cloudflare D1 + cron):
+
+- **`/api/trends`** — a metric (stars, commits, contributions, followers…)
+  charted over time from historical snapshots.
+- **`/api/wrapped`** — a shareable Year-in-Review (`year` param): total
+  contributions, busiest month, best day, longest streak, signature language.
+- **`/api/summary`** — an AI-generated one-to-two sentence developer blurb,
+  **precomputed on the schedule** (never on the request path) via a pluggable
+  provider (Anthropic / OpenAI).
+
+These are optional and self-hosted: see
+[docs/snapshots-and-ai.md](docs/snapshots-and-ai.md) for D1 setup, the cron, AI
+provider config, and honest cost implications.
+
 ### Themes
 
 Built-in: `default`, `dark`, `light`, `github_dark`, `tokyonight`, `dracula`,
@@ -224,8 +242,9 @@ invariants every change must uphold (chiefly: never return a broken image).
 - **M2 — Core cards + theming (done):** languages (paginated, 3 layouts),
   streak (tz-aware, multi-year), activity graph; expanded theme library +
   custom params; shared never-broken-image pipeline.
-- **M3 — Signature features:** D1 historical snapshots + cron; trend cards;
-  "Year in Review / Wrapped"; precomputed AI developer summary.
+- **M3 — Signature features (done):** D1 historical snapshots + cron; trend
+  cards; "Year in Review / Wrapped"; precomputed AI developer summary
+  (pluggable provider).
 - **M4 — Adoption:** visual configurator with live preview + copy snippets;
   GitHub Action deploy mode (commits static SVGs); polished docs + one-click
   deploy.

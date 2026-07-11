@@ -7,10 +7,20 @@ export interface Env {
   /** Hot cache namespace for rendered cards. */
   CACHE: KVNamespace;
 
+  /** Historical store for snapshots + precomputed AI summaries (optional). */
+  DB?: D1Database;
+
   // --- vars (wrangler.toml [vars]) ---
   CACHE_SECONDS?: string;
   STALE_SECONDS?: string;
   GITHUB_TIMEOUT_MS?: string;
+  /** AI provider: "anthropic" | "openai" | "workers-ai" | "none" (default). */
+  AI_PROVIDER?: string;
+  AI_MODEL?: string;
+
+  // --- secrets ---
+  /** API key for the configured AI provider (scheduled job only). */
+  AI_API_KEY?: string;
 
   // --- secrets (wrangler secret put) ---
   // GitHub PATs are discovered dynamically as PAT_1, PAT_2, ... so they are
