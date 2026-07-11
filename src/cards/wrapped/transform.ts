@@ -89,7 +89,7 @@ function computeLongestStreak(days: ContributionDay[]): number {
 }
 
 function pickTopLanguage(data: WrappedFetchResult): WrappedModel['topLanguage'] {
-  const model = transformLanguages(data.languages, { weight: 'size', langsCount: 5 });
+  const model = transformLanguages(data.languages, { weight: 'bytes', langsCount: 5 });
   const top = model.slices.find((s) => s.name !== 'Other');
   return top ? { name: top.name, color: top.color } : null;
 }

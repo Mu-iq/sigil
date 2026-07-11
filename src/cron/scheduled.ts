@@ -80,7 +80,7 @@ async function refreshSummary(
     { includePrivate: false },
     timeoutMs,
   );
-  const langModel = transformLanguages(langData, { weight: 'size', langsCount: 5 });
+  const langModel = transformLanguages(langData, { weight: 'bytes', langsCount: 5 });
   const signals: SummarySignals = {
     login: stats.login,
     name: stats.name,

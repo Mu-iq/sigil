@@ -28,10 +28,17 @@ describe('parseLanguagesParams', () => {
   });
 
   it('parses weight, exclude_repo and hide lists', () => {
-    const parsed = p('username=a&weight=count&exclude_repo=x,y&hide=html,css');
-    expect(parsed.weight).toBe('count');
+    const parsed = p('username=a&weight=bytes&exclude_repo=x,y&hide=html,css');
+    expect(parsed.weight).toBe('bytes');
     expect(parsed.excludeRepos).toEqual(['x', 'y']);
     expect(parsed.hideLanguages).toEqual(['html', 'css']);
+  });
+
+  it('defaults weight to count and accepts bytes/size/hybrid', () => {
+    expect(p('username=a').weight).toBe('count'); // default
+    expect(p('username=a&weight=hybrid').weight).toBe('hybrid');
+    expect(p('username=a&weight=size').weight).toBe('bytes'); // alias
+    expect(p('username=a&weight=nonsense').weight).toBe('count'); // fallback
   });
 });
 

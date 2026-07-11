@@ -1,5 +1,11 @@
 /** How a language's weight is computed. */
-export type LanguageWeight = 'size' | 'count';
+/**
+ * How language slices are weighted:
+ * - `bytes`  — raw code size (a few huge files can dominate).
+ * - `count`  — number of repos each language appears in (what you build in).
+ * - `hybrid` — blend of normalized byte share and normalized repo-count share.
+ */
+export type LanguageWeight = 'bytes' | 'count' | 'hybrid';
 
 /**
  * Per-repo language data flattened from the GraphQL response. This is the raw

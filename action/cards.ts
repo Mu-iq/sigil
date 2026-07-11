@@ -51,7 +51,7 @@ export async function renderActionCard(
         { includePrivate: false },
         timeoutMs,
       );
-      const model = transformLanguages(data, { weight: 'size', langsCount: 6 });
+      const model = transformLanguages(data, { weight: 'count', langsCount: 6 });
       return renderLanguagesCard(model, theme, {
         layout: cfg.langLayout,
         title: `${username}'s Top Languages`,

@@ -23,13 +23,18 @@ export interface LanguagesModel {
 interface Agg {
   name: string;
   color: string;
+  bytes: number;
+  /** Number of repos this language appears in. */
+  repoCount: number;
+  /** Final weight after applying the chosen weighting mode. */
   weight: number;
 }
 
 /**
  * Pure aggregation of per-repo language data into ranked, percentage-weighted
  * slices. Deterministic and I/O-free so it is fully unit-testable, including
- * the pagination-merge behavior (many repos -> one aggregate).
+ * the pagination-merge behavior (many repos -> one aggregate). Filtering
+ * (`hideLanguages`, `excludeRepos`) happens here, so it applies to every layout.
  */
 export function transformLanguages(
   data: LanguagesFetchResult,
@@ -45,18 +50,22 @@ export function transformLanguages(
       if (hidden.has(lang.name.toLowerCase())) continue;
       const key = lang.name.toLowerCase();
       const prev = byLang.get(key);
-      const add = options.weight === 'count' ? 1 : lang.size;
       if (prev) {
-        prev.weight += add;
+        prev.bytes += lang.size;
+        prev.repoCount += 1;
       } else {
         byLang.set(key, {
           name: lang.name,
           color: lang.color ?? NO_COLOR,
-          weight: add,
+          bytes: lang.size,
+          repoCount: 1,
+          weight: 0,
         });
       }
     }
   }
+
+  applyWeight([...byLang.values()], options.weight);
 
   const sorted = [...byLang.values()].sort((a, b) => b.weight - a.weight);
   const totalWeight = sorted.reduce((sum, a) => sum + a.weight, 0);
@@ -86,6 +95,25 @@ export function transformLanguages(
   }
 
   return { slices, hasOther };
+}
+
+/** Set each language's final `weight` according to the chosen mode. */
+function applyWeight(aggs: Agg[], weight: LanguageWeight): void {
+  if (weight === 'bytes') {
+    for (const a of aggs) a.weight = a.bytes;
+    return;
+  }
+  if (weight === 'count') {
+    for (const a of aggs) a.weight = a.repoCount;
+    return;
+  }
+  // hybrid: average of normalized byte share and normalized repo-count share.
+  // Both shares sum to 1 across languages, so no single huge repo dominates.
+  const totalBytes = aggs.reduce((s, a) => s + a.bytes, 0) || 1;
+  const totalCount = aggs.reduce((s, a) => s + a.repoCount, 0) || 1;
+  for (const a of aggs) {
+    a.weight = 0.5 * (a.bytes / totalBytes) + 0.5 * (a.repoCount / totalCount);
+  }
 }
 
 function round1(n: number): number {

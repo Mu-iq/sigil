@@ -19,7 +19,7 @@ function data(
   };
 }
 
-const OPTS = { weight: 'size' as const, langsCount: 6 };
+const OPTS = { weight: 'bytes' as const, langsCount: 6 };
 
 describe('transformLanguages', () => {
   it('aggregates the same language across many repos (pagination merge)', () => {
@@ -65,7 +65,7 @@ describe('transformLanguages', () => {
           ],
         },
       ]),
-      { weight: 'size', langsCount: 2 },
+      { weight: 'bytes', langsCount: 2 },
     );
     expect(model.hasOther).toBe(true);
     const other = model.slices.find((s) => s.name === 'Other');
@@ -102,7 +102,7 @@ describe('transformLanguages', () => {
           ],
         },
       ]),
-      { weight: 'size', langsCount: 6, excludeRepos: ['skip'], hideLanguages: ['html'] },
+      { weight: 'bytes', langsCount: 6, excludeRepos: ['skip'], hideLanguages: ['html'] },
     );
     expect(model.slices).toHaveLength(1);
     expect(model.slices[0]?.name).toBe('TS');
@@ -113,5 +113,49 @@ describe('transformLanguages', () => {
     const model = transformLanguages(data([]), OPTS);
     expect(model.slices).toHaveLength(0);
     expect(model.hasOther).toBe(false);
+  });
+});
+
+describe('transformLanguages weighting modes', () => {
+  // Jupyter Notebook dwarfs everything by bytes but appears in only one repo.
+  const repos = data([
+    { repo: 'notebook', langs: [['Jupyter Notebook', 5_000_000, '#DA5B0B']] },
+    { repo: 'a', langs: [['TypeScript', 5000, '#3178c6']] },
+    { repo: 'b', langs: [['TypeScript', 4000, '#3178c6']] },
+    { repo: 'c', langs: [['Go', 3000, '#00add8']] },
+  ]);
+
+  it('bytes weighting lets one huge file dominate', () => {
+    const m = transformLanguages(repos, { weight: 'bytes', langsCount: 6 });
+    expect(m.slices[0]?.name).toBe('Jupyter Notebook');
+    expect(m.slices[0]!.percentage).toBeGreaterThan(99);
+  });
+
+  it('count weighting ranks by repo appearances, not bytes', () => {
+    const m = transformLanguages(repos, { weight: 'count', langsCount: 6 });
+    // TS appears in 2 repos, Jupyter and Go in 1 each -> TS leads.
+    expect(m.slices[0]?.name).toBe('TypeScript');
+    const jupyter = m.slices.find((s) => s.name === 'Jupyter Notebook');
+    expect(jupyter!.percentage).toBeLessThan(30);
+  });
+
+  it('hybrid blends byte share and repo-count share (percentages sum to ~100)', () => {
+    const m = transformLanguages(repos, { weight: 'hybrid', langsCount: 6 });
+    const total = m.slices.reduce((s, x) => s + x.percentage, 0);
+    expect(Math.round(total)).toBe(100);
+    // Jupyter's huge bytes are tempered by its single-repo count.
+    const jupyter = m.slices.find((s) => s.name === 'Jupyter Notebook');
+    expect(jupyter!.percentage).toBeLessThan(80);
+    expect(jupyter!.percentage).toBeGreaterThan(30);
+  });
+
+  it('hide removes a language and rescales the rest to 100% (layout-agnostic)', () => {
+    const m = transformLanguages(repos, {
+      weight: 'count',
+      langsCount: 6,
+      hideLanguages: ['jupyter notebook'],
+    });
+    expect(m.slices.some((s) => s.name === 'Jupyter Notebook')).toBe(false);
+    expect(Math.round(m.slices.reduce((s, x) => s + x.percentage, 0))).toBe(100);
   });
 });

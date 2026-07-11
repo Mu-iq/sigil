@@ -35,15 +35,26 @@ export function computeEtag(svg: string): string {
   return `W/"${(h >>> 0).toString(16)}-${svg.length.toString(16)}"`;
 }
 
+/**
+ * Bump when a rendering/theme change should invalidate all previously cached
+ * cards. Old entries keep their old prefix and are simply never read again (they
+ * expire via TTL), so a deploy never serves a stale look.
+ */
+const CACHE_VERSION = 'v2';
+
 export class KvCardCache implements CardCache {
   constructor(private readonly kv: KVNamespace) {}
+
+  private versioned(key: string): string {
+    return `${CACHE_VERSION}:${key}`;
+  }
 
   async get(
     key: string,
     freshSeconds: number,
     staleSeconds: number,
   ): Promise<CacheLookup> {
-    const raw = await this.kv.get(key, 'json');
+    const raw = await this.kv.get(this.versioned(key), 'json');
     if (!raw) return { entry: null, freshness: 'miss' };
     const entry = raw as CachedCard;
     const ageSeconds = (Date.now() - entry.storedAt) / 1000;
@@ -61,7 +72,9 @@ export class KvCardCache implements CardCache {
     // Keep entries around a bit beyond the stale window so a slow revalidate
     // still finds a last-good card. TTL is a coarse safety net; freshness is
     // decided by storedAt above. Min KV TTL is 60s.
-    await this.kv.put(key, JSON.stringify(entry), { expirationTtl: 60 * 60 * 24 * 7 });
+    await this.kv.put(this.versioned(key), JSON.stringify(entry), {
+      expirationTtl: 60 * 60 * 24 * 7,
+    });
     return entry;
   }
 }

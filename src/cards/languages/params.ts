@@ -31,6 +31,21 @@ function parseBool(raw: string | undefined, fallback: boolean): boolean {
   return fallback;
 }
 
+/** Default is `count` (repo-count) so byte-heavy files don't dominate. */
+function parseWeight(raw: string | null): LanguageWeight {
+  switch ((raw ?? '').trim().toLowerCase()) {
+    case 'bytes':
+    case 'size': // backwards-compatible alias for byte weighting
+      return 'bytes';
+    case 'hybrid':
+      return 'hybrid';
+    case 'count':
+      return 'count';
+    default:
+      return 'count';
+  }
+}
+
 function parseList(raw: string | undefined): string[] | undefined {
   if (!raw) return undefined;
   const items = raw
@@ -52,7 +67,7 @@ export function parseLanguagesParams(q: URLSearchParams): LanguagesParams {
     ? (layoutRaw as LanguagesLayout)
     : 'normal';
 
-  const weight: LanguageWeight = q.get('weight') === 'count' ? 'count' : 'size';
+  const weight = parseWeight(q.get('weight'));
 
   const countRaw = q.get('langs_count');
   const count = countRaw ? Number(countRaw) : 6;
