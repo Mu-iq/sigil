@@ -1,0 +1,23 @@
+# Cloudflare Workers configuration for sigil.
+# Secrets (GitHub PATs, AI keys) are NOT stored here — set them with:
+#   wrangler secret put PAT_1
+# See docs/self-hosting.md.
+
+name = "sigil"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Hot cache for rendered SVG cards (per-card SVG + ETag + timestamp).
+# Create with: wrangler kv namespace create CARD_CACHE
+# then paste the id below.
+[[kv_namespaces]]
+binding = "CARD_CACHE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+preview_id = "REPLACE_WITH_KV_PREVIEW_ID"
+
+[vars]
+# Non-secret defaults. Freshness window for a card in seconds.
+CACHE_SECONDS = "21600"        # 6h fresh
+STALE_SECONDS = "86400"        # serve stale up to 24h while revalidating
+GITHUB_TIMEOUT_MS = "8000"
