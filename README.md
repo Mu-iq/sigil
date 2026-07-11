@@ -13,9 +13,10 @@ consistent theme system. Self-hostable on the edge (Cloudflare Workers).
 > deploy mode**, one-click deploy, CI, and a **live demo instance** are all in
 > place. See the [live examples](#live-examples) above.
 
-**Build your card by clicking** — the [visual configurator](configurator/) gives
-a live preview, theme picker, and copy-ready snippets. Two ways to ship:
-a [self-hosted Worker](docs/self-hosting.md) or a
+**Build your card by clicking** — the
+[visual configurator](https://sigil-configurator.pages.dev) gives a live preview,
+theme picker, and copy-ready snippets ([source](configurator/)). Two ways to
+ship: a [self-hosted Worker](docs/self-hosting.md) or a
 [GitHub Action](action/) that commits static SVGs (cards that can never break).
 
 ## Live examples
