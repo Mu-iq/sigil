@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
+import { handleActivity } from './cards/activity/index.js';
 import { handleLanguages } from './cards/languages/index.js';
 import { handleStats } from './cards/stats/index.js';
+import { handleStreak } from './cards/streak/index.js';
 import { KvCardCache } from './cache/kv.js';
 import { collectTokens, intVar, type Env } from './env.js';
 import { TokenPool } from './github/token-pool.js';
@@ -30,6 +32,16 @@ app.get('/api/languages', async (c) => {
   return handleLanguages(c.req.raw, deps);
 });
 
+app.get('/api/streak', async (c) => {
+  const deps = buildCardDeps(c.env, (p) => c.executionCtx.waitUntil(p));
+  return handleStreak(c.req.raw, deps);
+});
+
+app.get('/api/activity', async (c) => {
+  const deps = buildCardDeps(c.env, (p) => c.executionCtx.waitUntil(p));
+  return handleActivity(c.req.raw, deps);
+});
+
 app.get('/', (c) =>
   c.json({
     service: 'sigil',
@@ -38,6 +50,8 @@ app.get('/', (c) =>
       '/health',
       '/api/stats?username=<login>',
       '/api/languages?username=<login>',
+      '/api/streak?username=<login>',
+      '/api/activity?username=<login>',
     ],
   }),
 );

@@ -114,6 +114,45 @@ export interface LanguagesQueryResult {
   } | null;
 }
 
+/**
+ * Contribution calendar for one time window (GitHub caps each
+ * contributionsCollection at ~1 year). The streak card loops this per calendar
+ * year from account creation to now, then merges days — so streaks aren't
+ * silently truncated to a single year like some tools. `createdAt` bounds how
+ * far back we page. Fields verified against ContributionsCollection /
+ * ContributionCalendar.
+ */
+export const STREAK_QUERY = /* GraphQL */ `
+  query userStreak($login: String!, $from: DateTime!, $to: DateTime!) {
+    user(login: $login) {
+      createdAt
+      contributionsCollection(from: $from, to: $to) {
+        contributionCalendar {
+          weeks {
+            contributionDays {
+              date
+              contributionCount
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export interface StreakQueryResult {
+  user: {
+    createdAt: string;
+    contributionsCollection: {
+      contributionCalendar: {
+        weeks: Array<{
+          contributionDays: Array<{ date: string; contributionCount: number }>;
+        }>;
+      };
+    };
+  } | null;
+}
+
 /** Shape returned by STATS_QUERY. Mirrors the query exactly. */
 export interface StatsQueryResult {
   user: {

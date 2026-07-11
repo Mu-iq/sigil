@@ -4,10 +4,10 @@ Dynamically generated, always-reliable **SVG stat cards** for your GitHub
 profile README — stats, streaks, languages, activity, trends, and more, with one
 consistent theme system. Self-hostable on the edge (Cloudflare Workers).
 
-> **Status: M2 (in progress).** The stats and top-languages cards, the theme
-> library, token pool, KV caching, and the never-broken-image fallback are in
-> place and runnable. Streak, activity, trends, wrapped, AI summary, and the
-> visual configurator land in later milestones — see [Roadmap](#roadmap).
+> **Status: M2 (done).** Stats, top-languages, streak (tz-aware), and activity
+> cards; the theme library; token pool; KV caching; and the never-broken-image
+> fallback are all in place and runnable. Trends, wrapped, AI summary, and the
+> visual configurator land in M3–M4 — see [Roadmap](#roadmap).
 
 ---
 
@@ -85,6 +85,40 @@ language bytes across them.
 
 \*\* Language stats reflect the bytes in _your own_ repos, not contributions to
 others — a GitHub API limitation shared by every tool in this category.
+
+### Streak card (`/api/streak`)
+
+Current streak, longest streak, and total contributions — with **timezone-aware**
+day boundaries and full multi-year history (not clipped to the last 12 months).
+
+```md
+![Streak](https://<your-instance>.workers.dev/api/streak?username=Mu-iq&tz=America/New_York&theme=dracula)
+```
+
+| Param           | Default   | Description                                                                    |
+| --------------- | --------- | ------------------------------------------------------------------------------ |
+| `username`      | _(req'd)_ | GitHub login to render.                                                        |
+| `theme`         | `default` | Built-in theme name (see [Themes](#themes)).                                   |
+| `tz`            | `UTC`     | IANA timezone for day boundaries (e.g. `America/New_York`). Alias: `timezone`. |
+| `hide_border`   | `false`   | Hide the card border.                                                          |
+| `border_radius` | `8`       | Corner radius (0–24).                                                          |
+
+### Activity graph (`/api/activity`)
+
+A hand-rendered area/line chart of daily contributions over a selectable window.
+
+```md
+![Activity](https://<your-instance>.workers.dev/api/activity?username=Mu-iq&days=60&theme=tokyonight)
+```
+
+| Param           | Default   | Description                                  |
+| --------------- | --------- | -------------------------------------------- |
+| `username`      | _(req'd)_ | GitHub login to render.                      |
+| `theme`         | `default` | Built-in theme name (see [Themes](#themes)). |
+| `days`          | `30`      | Window size in days (7–365).                 |
+| `hide_border`   | `false`   | Hide the card border.                        |
+| `border_radius` | `8`       | Corner radius (0–24).                        |
+| `title`         | –         | Custom card title (max 60 chars).            |
 
 ### Themes
 
@@ -187,9 +221,9 @@ invariants every change must uphold (chiefly: never return a broken image).
 
 - **M1 — MVP (done):** `/health`, `/api/stats`, theming foundation, token pool,
   KV cache + stale-while-revalidate, never-broken-image fallback.
-- **M2 — Core cards + theming (in progress):** languages card (paginated,
-  3 layouts) ✓ and the expanded theme library ✓; streak (tz-aware) and activity
-  graph next.
+- **M2 — Core cards + theming (done):** languages (paginated, 3 layouts),
+  streak (tz-aware, multi-year), activity graph; expanded theme library +
+  custom params; shared never-broken-image pipeline.
 - **M3 — Signature features:** D1 historical snapshots + cron; trend cards;
   "Year in Review / Wrapped"; precomputed AI developer summary.
 - **M4 — Adoption:** visual configurator with live preview + copy snippets;

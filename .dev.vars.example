@@ -1,6 +1,0 @@
-# Copy to .dev.vars for local `wrangler dev`. Never commit .dev.vars.
-# At least one GitHub Personal Access Token. Add more (PAT_2, PAT_3, ...) to
-# enable token rotation. Classic PAT with `read:user`, `repo` (for private
-# stats) scopes, or a fine-grained token with equivalent read access.
-PAT_1=ghp_your_token_here
-# PAT_2=ghp_second_token
