@@ -10,23 +10,25 @@ export interface WrappedRenderOptions {
   login: string;
   hideBorder: boolean;
   borderRadius: number;
+  width?: number | undefined;
 }
 
-const WIDTH = 500;
+const DEFAULT_WIDTH = 500;
 const HEIGHT = 250;
-const HERO_X = 130; // center of the left hero column
-const DIV_X = 250;
 
 /**
  * Render the Year-in-Review / Wrapped card: a left hero (year + total) and a
- * right column of highlights, designed to look good shared to social. Fully
- * self-contained SVG, all text escaped.
+ * right column of highlights, designed to look good shared to social. Width is
+ * configurable via `card_width`. Fully self-contained SVG, all text escaped.
  */
 export function renderWrappedCard(
   model: WrappedModel,
   theme: Theme,
   options: WrappedRenderOptions,
 ): string {
+  const WIDTH = options.width ?? DEFAULT_WIDTH;
+  const DIV_X = Math.round(WIDTH / 2); // divider between hero and highlights
+  const HERO_X = Math.round(WIDTH / 4); // center of the left hero column
   const { defs, fill } = resolveBackground(theme, 'sigil-wrapped-bg');
   const border = options.hideBorder
     ? ''
@@ -39,7 +41,7 @@ export function renderWrappedCard(
     <text x="${HERO_X}" y="192" font-size="12" fill="${theme.mutedColor}">${model.activeDays} active days</text>
   </g>`;
 
-  const highlights = renderHighlights(model, theme);
+  const highlights = renderHighlights(model, theme, DIV_X + 24);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-labelledby="sigil-wrapped-title sigil-wrapped-desc">
   <title id="sigil-wrapped-title">${escapeXml(options.login)}'s ${model.year} GitHub Wrapped</title>
@@ -54,7 +56,7 @@ export function renderWrappedCard(
 </svg>`;
 }
 
-function renderHighlights(model: WrappedModel, theme: Theme): string {
+function renderHighlights(model: WrappedModel, theme: Theme, startX: number): string {
   const rows: Array<{ label: string; value: string; dot?: string }> = [
     { label: 'Longest streak', value: `${model.longestStreak} days` },
     {
@@ -76,7 +78,6 @@ function renderHighlights(model: WrappedModel, theme: Theme): string {
     },
   ];
 
-  const startX = DIV_X + 24;
   const startY = 66;
   const rowH = 42;
 

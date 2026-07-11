@@ -1,4 +1,5 @@
 import type { ThemeOverrides } from '../../themes/index.js';
+import { parseCardWidth } from '../common-params.js';
 import { ParamError } from '../params-error.js';
 import { ALL_STAT_KEYS, type StatKey } from './transform.js';
 
@@ -16,6 +17,7 @@ export interface StatsParams {
   hideRank: boolean;
   hideBorder: boolean;
   borderRadius: number;
+  cardWidth: number | undefined;
   title: string | undefined;
 }
 
@@ -75,6 +77,7 @@ export function parseStatsParams(q: URLSearchParams): StatsParams {
     hideRank: parseBool(q.get('hide_rank') ?? undefined, false),
     hideBorder: parseBool(q.get('hide_border') ?? undefined, false),
     borderRadius,
+    cardWidth: parseCardWidth(q.get('card_width') ?? undefined),
     // Cap title length to keep the SVG bounded; escaping happens at render.
     title: title ? title.slice(0, 60) : undefined,
   };
@@ -95,6 +98,7 @@ export function statsCacheKey(p: StatsParams): string {
     `rank=${p.hideRank ? 0 : 1}`,
     `border=${p.hideBorder ? 0 : 1}`,
     `radius=${p.borderRadius}`,
+    `w=${p.cardWidth ?? ''}`,
     `title=${p.title ?? ''}`,
   ];
   for (const [k, v] of Object.entries(p.overrides)) {

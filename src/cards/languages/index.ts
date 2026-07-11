@@ -37,6 +37,7 @@ async function buildLanguagesSvg(
     title: params.title ?? `${params.username}'s Top Languages`,
     hideBorder: params.hideBorder,
     borderRadius: params.borderRadius,
+    width: params.cardWidth,
   });
 }
 

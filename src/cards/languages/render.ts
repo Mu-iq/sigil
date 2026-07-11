@@ -11,10 +11,12 @@ export interface LanguagesRenderOptions {
   title: string;
   hideBorder: boolean;
   borderRadius: number;
+  width?: number | undefined;
 }
 
-const WIDTH = 300;
 const PAD = 25;
+const DEFAULT_WIDTH = 300;
+const DEFAULT_DONUT_WIDTH = 360;
 
 /** Render the languages card in the requested layout. Always valid SVG. */
 export function renderLanguagesCard(
@@ -60,11 +62,12 @@ function renderNormal(
   theme: Theme,
   options: LanguagesRenderOptions,
 ): string {
+  const width = options.width ?? DEFAULT_WIDTH;
   const rowH = 40;
   const top = 55;
   const height = top + model.slices.length * rowH + 5;
-  const { open, close } = frameFor(theme, options, WIDTH, height);
-  const barW = WIDTH - PAD * 2;
+  const { open, close } = frameFor(theme, options, width, height);
+  const barW = width - PAD * 2;
 
   const rows = model.slices
     .map((s, i) => {
@@ -72,7 +75,7 @@ function renderNormal(
       const filled = Math.max(2, (s.percentage / 100) * barW);
       return `<g>
     <text x="${PAD}" y="${y}" font-family="${FONT_STACK}" font-size="13" font-weight="600" fill="${theme.textColor}">${escapeXml(s.name)}</text>
-    <text x="${WIDTH - PAD}" y="${y}" text-anchor="end" font-family="${FONT_STACK}" font-size="12" fill="${theme.mutedColor}">${s.percentage}%</text>
+    <text x="${width - PAD}" y="${y}" text-anchor="end" font-family="${FONT_STACK}" font-size="12" fill="${theme.mutedColor}">${s.percentage}%</text>
     <rect x="${PAD}" y="${y + 8}" width="${barW}" height="8" rx="4" fill="${theme.borderColor}"/>
     <rect x="${PAD}" y="${y + 8}" width="${filled.toFixed(1)}" height="8" rx="4" fill="${s.color}"/>
   </g>`;
@@ -88,12 +91,13 @@ function renderCompact(
   theme: Theme,
   options: LanguagesRenderOptions,
 ): string {
-  const barW = WIDTH - PAD * 2;
+  const width = options.width ?? DEFAULT_WIDTH;
+  const barW = width - PAD * 2;
   const barY = 50;
   const legendTop = 78;
   const rowsPerCol = Math.ceil(model.slices.length / 2);
   const height = legendTop + rowsPerCol * 22 + 5;
-  const { open, close } = frameFor(theme, options, WIDTH, height);
+  const { open, close } = frameFor(theme, options, width, height);
 
   // Stacked segments across one rounded bar.
   let x = PAD;
@@ -132,7 +136,7 @@ function renderDonut(
   theme: Theme,
   options: LanguagesRenderOptions,
 ): string {
-  const width = 360;
+  const width = options.width ?? DEFAULT_DONUT_WIDTH;
   const cx = 92;
   const cy = 110;
   const r = 52;
@@ -154,7 +158,9 @@ function renderDonut(
     })
     .join('\n  ');
 
-  const legendX = 175;
+  // Legend sits to the right of the ring; the % is right-anchored so it tracks
+  // the card's right edge when the width changes.
+  const legendX = 180;
   const legend = model.slices
     .map((s, i) => {
       const ly = 60 + i * 22;
@@ -174,7 +180,8 @@ ${close}`;
 
 /** Empty state: valid card, honest message — still never a broken image. */
 function renderEmpty(theme: Theme, options: LanguagesRenderOptions): string {
-  const { open, close } = frameFor(theme, options, WIDTH, 120);
+  const width = options.width ?? DEFAULT_WIDTH;
+  const { open, close } = frameFor(theme, options, width, 120);
   return `${open}
   <text x="${PAD}" y="75" font-family="${FONT_STACK}" font-size="13" fill="${theme.mutedColor}">No public language data found.</text>
 ${close}`;

@@ -8,13 +8,13 @@ import type { BuiltinThemeName, Theme } from './types.js';
  */
 export const BUILTIN_THEMES: Record<BuiltinThemeName, Theme> = {
   default: {
-    titleColor: '#58a6ff',
+    titleColor: '#79c0ff',
     textColor: '#c9d1d9',
     mutedColor: '#8b949e',
-    iconColor: '#58a6ff',
+    iconColor: '#79c0ff',
     bg: '35,#0d1117,#161b22',
     borderColor: '#30363d',
-    accentColor: '#58a6ff',
+    accentColor: '#79c0ff',
   },
   dark: {
     titleColor: '#58a6ff',
@@ -23,7 +23,7 @@ export const BUILTIN_THEMES: Record<BuiltinThemeName, Theme> = {
     iconColor: '#58a6ff',
     bg: '#0d1117',
     borderColor: '#30363d',
-    accentColor: '#3fb950',
+    accentColor: '#58a6ff',
   },
   light: {
     titleColor: '#0969da',
@@ -35,13 +35,13 @@ export const BUILTIN_THEMES: Record<BuiltinThemeName, Theme> = {
     accentColor: '#0969da',
   },
   github_dark: {
-    titleColor: '#e6edf3',
+    titleColor: '#79c0ff',
     textColor: '#c9d1d9',
     mutedColor: '#8b949e',
-    iconColor: '#7ee787',
+    iconColor: '#79c0ff',
     bg: '#0d1117',
     borderColor: '#30363d',
-    accentColor: '#7ee787',
+    accentColor: '#79c0ff',
   },
   tokyonight: {
     titleColor: '#7aa2f7',

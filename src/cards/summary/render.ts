@@ -9,9 +9,10 @@ export interface SummaryRenderOptions {
   enabled: boolean;
   hideBorder: boolean;
   borderRadius: number;
+  width?: number | undefined;
 }
 
-const WIDTH = 467;
+const DEFAULT_WIDTH = 467;
 const PAD = 25;
 
 /**
@@ -25,12 +26,15 @@ export function renderSummaryCard(
   theme: Theme,
   options: SummaryRenderOptions,
 ): string {
+  const WIDTH = options.width ?? DEFAULT_WIDTH;
   const body =
     summary ??
     (options.enabled
       ? 'A summary will appear here after the next scheduled update.'
       : 'AI summary is not enabled for this instance.');
-  const lines = wrap(body, 60).slice(0, 4);
+  // Approximate chars-per-line from the usable width (~7.4px per char at 14px).
+  const maxChars = Math.max(24, Math.floor((WIDTH - PAD * 2) / 7.4));
+  const lines = wrap(body, maxChars).slice(0, 4);
   const height = 60 + lines.length * 22 + 10;
   const { defs, fill } = resolveBackground(theme, 'sigil-summary-bg');
   const border = options.hideBorder

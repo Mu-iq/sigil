@@ -33,6 +33,7 @@ async function buildStatsSvg(
   return renderStatsCard(model, theme, {
     hideBorder: params.hideBorder,
     borderRadius: params.borderRadius,
+    width: params.cardWidth,
   });
 }
 

@@ -25,6 +25,7 @@ async function buildTrendsSvg(
     metricLabel: METRIC_LABELS[params.metric],
     hideBorder: params.hideBorder,
     borderRadius: params.borderRadius,
+    width: params.cardWidth,
   };
 
   // No store -> render the "collecting" state (empty series). Still valid SVG.

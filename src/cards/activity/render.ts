@@ -9,26 +9,36 @@ export interface ActivityRenderOptions {
   title: string;
   hideBorder: boolean;
   borderRadius: number;
+  width?: number | undefined;
 }
 
-const WIDTH = 495;
-const HEIGHT = 220;
+const DEFAULT_WIDTH = 495;
+const HEIGHT = 200;
 const LEFT = 40;
-const RIGHT = WIDTH - 25;
-const TOP = 70;
-const BOTTOM = HEIGHT - 32;
+const TOP = 64;
+const BOTTOM = HEIGHT - 28;
+
+interface Geom {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
 
 /**
  * Render the activity graph as a hand-authored area+line chart (Satori is weak
- * at charts). Self-contained SVG, all labels escaped.
+ * at charts). Width is configurable via `card_width`. Self-contained SVG, all
+ * labels escaped.
  */
 export function renderActivityCard(
   model: ActivityModel,
   theme: Theme,
   options: ActivityRenderOptions,
 ): string {
+  const width = options.width ?? DEFAULT_WIDTH;
+  const geom: Geom = { left: LEFT, right: width - 25, top: TOP, bottom: BOTTOM };
   const { open, close } = cardFrame({
-    width: WIDTH,
+    width,
     height: HEIGHT,
     theme,
     title: options.title,
@@ -40,8 +50,8 @@ export function renderActivityCard(
 
   const summary = `<text x="25" y="52" font-family="${FONT_STACK}" font-size="12" fill="${theme.mutedColor}">${model.total} contributions · avg ${model.average}/day · peak ${model.max}</text>`;
 
-  const chart = renderChart(model, theme);
-  const axis = renderAxis(model, theme);
+  const chart = renderChart(model, theme, geom);
+  const axis = renderAxis(model, theme, geom);
 
   return `${open}
   ${summary}
@@ -50,20 +60,20 @@ export function renderActivityCard(
 ${close}`;
 }
 
-function renderChart(model: ActivityModel, theme: Theme): string {
+function renderChart(model: ActivityModel, theme: Theme, g: Geom): string {
   const n = model.points.length;
   if (n === 0) {
     return `<text x="25" y="130" font-family="${FONT_STACK}" font-size="13" fill="${theme.mutedColor}">No contribution data in this window.</text>`;
   }
 
-  const chartW = RIGHT - LEFT;
-  const chartH = BOTTOM - TOP;
+  const chartW = g.right - g.left;
+  const chartH = g.bottom - g.top;
   const scaleMax = model.max > 0 ? model.max : 1;
   const step = n > 1 ? chartW / (n - 1) : 0;
 
   const coords = model.points.map((p, i) => {
-    const x = LEFT + i * step;
-    const y = BOTTOM - (p.count / scaleMax) * chartH;
+    const x = g.left + i * step;
+    const y = g.bottom - (p.count / scaleMax) * chartH;
     return { x, y };
   });
 
@@ -73,7 +83,7 @@ function renderChart(model: ActivityModel, theme: Theme): string {
 
   const first = coords[0]!;
   const last = coords[coords.length - 1]!;
-  const areaPath = `${linePath} L ${last.x.toFixed(1)} ${BOTTOM} L ${first.x.toFixed(1)} ${BOTTOM} Z`;
+  const areaPath = `${linePath} L ${last.x.toFixed(1)} ${g.bottom} L ${first.x.toFixed(1)} ${g.bottom} Z`;
 
   return `<defs>
     <linearGradient id="sigil-activity-fill" x1="0" y1="0" x2="0" y2="1">
@@ -85,22 +95,22 @@ function renderChart(model: ActivityModel, theme: Theme): string {
   <path d="${linePath}" fill="none" stroke="${theme.accentColor}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
 }
 
-function renderAxis(model: ActivityModel, theme: Theme): string {
+function renderAxis(model: ActivityModel, theme: Theme, g: Geom): string {
   const scaleMax = model.max > 0 ? model.max : 1;
   // Baseline + a midline gridline, with y-axis value labels.
-  const midY = (TOP + BOTTOM) / 2;
+  const midY = (g.top + g.bottom) / 2;
   const gridlines = `
-  <line x1="${LEFT}" y1="${BOTTOM}" x2="${RIGHT}" y2="${BOTTOM}" stroke="${theme.borderColor}"/>
-  <line x1="${LEFT}" y1="${midY}" x2="${RIGHT}" y2="${midY}" stroke="${theme.borderColor}" stroke-opacity="0.4"/>
-  <text x="${LEFT - 6}" y="${BOTTOM + 3}" text-anchor="end" font-family="${FONT_STACK}" font-size="9" fill="${theme.mutedColor}">0</text>
-  <text x="${LEFT - 6}" y="${midY + 3}" text-anchor="end" font-family="${FONT_STACK}" font-size="9" fill="${theme.mutedColor}">${Math.round(scaleMax / 2)}</text>
-  <text x="${LEFT - 6}" y="${TOP + 3}" text-anchor="end" font-family="${FONT_STACK}" font-size="9" fill="${theme.mutedColor}">${scaleMax}</text>`;
+  <line x1="${g.left}" y1="${g.bottom}" x2="${g.right}" y2="${g.bottom}" stroke="${theme.borderColor}"/>
+  <line x1="${g.left}" y1="${midY}" x2="${g.right}" y2="${midY}" stroke="${theme.borderColor}" stroke-opacity="0.4"/>
+  <text x="${g.left - 6}" y="${g.bottom + 3}" text-anchor="end" font-family="${FONT_STACK}" font-size="9" fill="${theme.mutedColor}">0</text>
+  <text x="${g.left - 6}" y="${midY + 3}" text-anchor="end" font-family="${FONT_STACK}" font-size="9" fill="${theme.mutedColor}">${Math.round(scaleMax / 2)}</text>
+  <text x="${g.left - 6}" y="${g.top + 3}" text-anchor="end" font-family="${FONT_STACK}" font-size="9" fill="${theme.mutedColor}">${scaleMax}</text>`;
 
   const startLabel = escapeXml(formatDayLabel(model.startDate));
   const endLabel = escapeXml(formatDayLabel(model.endDate));
   const dateLabels = `
-  <text x="${LEFT}" y="${BOTTOM + 18}" font-family="${FONT_STACK}" font-size="10" fill="${theme.mutedColor}">${startLabel}</text>
-  <text x="${RIGHT}" y="${BOTTOM + 18}" text-anchor="end" font-family="${FONT_STACK}" font-size="10" fill="${theme.mutedColor}">${endLabel}</text>`;
+  <text x="${g.left}" y="${g.bottom + 18}" font-family="${FONT_STACK}" font-size="10" fill="${theme.mutedColor}">${startLabel}</text>
+  <text x="${g.right}" y="${g.bottom + 18}" text-anchor="end" font-family="${FONT_STACK}" font-size="10" fill="${theme.mutedColor}">${endLabel}</text>`;
 
   return gridlines + dateLabels;
 }

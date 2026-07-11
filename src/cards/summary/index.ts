@@ -25,6 +25,7 @@ async function buildSummarySvg(
     enabled: deps.aiEnabled,
     hideBorder: params.hideBorder,
     borderRadius: params.borderRadius,
+    width: params.cardWidth,
   });
 }
 

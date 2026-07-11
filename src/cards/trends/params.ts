@@ -1,4 +1,5 @@
 import type { ThemeOverrides } from '../../themes/index.js';
+import { parseCardWidth } from '../common-params.js';
 import { ParamError } from '../params-error.js';
 import type { TrendMetric } from '../../snapshots/trends.js';
 
@@ -10,6 +11,7 @@ export interface TrendsParams {
   overrides: ThemeOverrides;
   hideBorder: boolean;
   borderRadius: number;
+  cardWidth: number | undefined;
   title: string | undefined;
 }
 
@@ -79,6 +81,7 @@ export function parseTrendsParams(q: URLSearchParams): TrendsParams {
     },
     hideBorder: parseBool(q.get('hide_border') ?? undefined, false),
     borderRadius,
+    cardWidth: parseCardWidth(q.get('card_width') ?? undefined),
     title: title ? title.slice(0, 60) : undefined,
   };
 }
@@ -91,6 +94,7 @@ export function trendsCacheKey(p: TrendsParams): string {
     `theme=${p.theme}`,
     `border=${p.hideBorder ? 0 : 1}`,
     `radius=${p.borderRadius}`,
+    `w=${p.cardWidth ?? ''}`,
     `title=${p.title ?? ''}`,
   ];
   for (const [k, v] of Object.entries(p.overrides)) {

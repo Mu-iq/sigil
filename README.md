@@ -6,17 +6,14 @@ consistent theme system. Self-hostable on the edge (Cloudflare Workers).
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Mu-iq/sigil)
 
-> **Status: M4 (done).** All eight card types — stats, top-languages, streak,
-> activity, trends, wrapped, and the (opt-in) AI developer summary — historical
-> snapshots (D1 + cron), the theme library, token pool, KV caching, the
-> never-broken-image fallback, the **visual configurator**, the **GitHub Action
-> deploy mode**, one-click deploy, CI, and a **live demo instance** are all in
-> place. See the [live examples](#live-examples) above.
+Eight card types — **stats, top-languages, streak, activity, trends, wrapped**,
+and an opt-in **AI developer summary** — all sharing one theme system, a token
+pool, edge caching, and the never-broken-image guarantee.
 
 **Build your card by clicking** — the
-[visual configurator](https://sigil-configurator.pages.dev) gives a live preview,
-theme picker, and copy-ready snippets ([source](configurator/)). Two ways to
-ship: a [self-hosted Worker](docs/self-hosting.md) or a
+[visual configurator](https://sigil-configurator.pages.dev) gives a live
+preview, theme picker, and copy-ready snippets ([source](configurator/)). Two
+ways to ship: a [self-hosted Worker](docs/self-hosting.md) or a
 [GitHub Action](action/) that commits static SVGs (cards that can never break).
 
 ## Live examples
@@ -89,6 +86,20 @@ Add this to your profile `README.md` (replace `username`):
 There is no shared public instance yet — self-host your own in a couple of
 minutes (below). This keeps your rate limit yours and your private stats
 private.
+
+### Shared parameters (every card)
+
+These work on **all** card endpoints:
+
+| Param           | Default   | Description                                                                                                                                            |
+| --------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `username`      | _(req'd)_ | GitHub login to render.                                                                                                                                |
+| `theme`         | `default` | Built-in theme name (see [Themes](#themes)) or custom colors.                                                                                          |
+| `card_width`    | per-card  | Fixed card width in px, clamped 300–900. Set the **same** value on every card so they line up in a README grid (e.g. `card_width=450` for a 2×2 grid). |
+| `hide_border`   | `false`   | Hide the card border.                                                                                                                                  |
+| `border_radius` | `8`       | Corner radius (0–24).                                                                                                                                  |
+
+The per-card options below are in addition to these.
 
 ### Stats card options
 
@@ -286,21 +297,13 @@ invariants every change must uphold (chiefly: never return a broken image).
 
 ---
 
-## Roadmap
+## Contributing
 
-- **M1 — MVP (done):** `/health`, `/api/stats`, theming foundation, token pool,
-  KV cache + stale-while-revalidate, never-broken-image fallback.
-- **M2 — Core cards + theming (done):** languages (paginated, 3 layouts),
-  streak (tz-aware, multi-year), activity graph; expanded theme library +
-  custom params; shared never-broken-image pipeline.
-- **M3 — Signature features (done):** D1 historical snapshots + cron; trend
-  cards; "Year in Review / Wrapped"; precomputed AI developer summary
-  (pluggable provider).
-- **M4 — Adoption (done):** visual configurator ✓, GitHub Action deploy mode ✓,
-  one-click deploy ✓, CI ✓, comparison table ✓, live demo instance ✓.
-
----
+Issues and PRs welcome. Local dev: `pnpm install`, `pnpm dev`, `pnpm test`. A
+change should keep types (`pnpm typecheck`), lint (`pnpm lint`), and tests
+(`pnpm test`) green, and must preserve the never-broken-image invariant on every
+new path. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT.
+[MIT](LICENSE).

@@ -19,7 +19,8 @@ describe('renderSummaryCard', () => {
 
   it('shows a waiting state when enabled but no summary is stored', () => {
     const svg = renderSummaryCard(null, resolveTheme('dark'), OPTS);
-    expect(svg).toContain('after the next scheduled update');
+    // Text is word-wrapped, so assert on a phrase that stays on one line.
+    expect(svg).toContain('A summary will appear');
     expect(svg.startsWith('<svg')).toBe(true);
   });
 

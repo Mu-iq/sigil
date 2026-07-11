@@ -1,4 +1,5 @@
 import type { ThemeOverrides } from '../../themes/index.js';
+import { parseCardWidth } from '../common-params.js';
 import { ParamError } from '../params-error.js';
 import type { LanguagesLayout } from './render.js';
 import type { LanguageWeight } from './types.js';
@@ -15,6 +16,7 @@ export interface LanguagesParams {
   includePrivate: boolean;
   hideBorder: boolean;
   borderRadius: number;
+  cardWidth: number | undefined;
   title: string | undefined;
 }
 
@@ -82,6 +84,7 @@ export function parseLanguagesParams(q: URLSearchParams): LanguagesParams {
     includePrivate: parseBool(q.get('include_private') ?? undefined, false),
     hideBorder: parseBool(q.get('hide_border') ?? undefined, false),
     borderRadius,
+    cardWidth: parseCardWidth(q.get('card_width') ?? undefined),
     title: title ? title.slice(0, 60) : undefined,
   };
 }
@@ -104,6 +107,7 @@ export function languagesCacheKey(p: LanguagesParams): string {
     `priv=${p.includePrivate ? 1 : 0}`,
     `border=${p.hideBorder ? 0 : 1}`,
     `radius=${p.borderRadius}`,
+    `w=${p.cardWidth ?? ''}`,
     `title=${p.title ?? ''}`,
   ];
   for (const [k, v] of Object.entries(p.overrides)) {

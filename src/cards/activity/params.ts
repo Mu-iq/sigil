@@ -1,4 +1,5 @@
 import type { ThemeOverrides } from '../../themes/index.js';
+import { parseCardWidth } from '../common-params.js';
 import { ParamError } from '../params-error.js';
 
 export interface ActivityParams {
@@ -9,6 +10,7 @@ export interface ActivityParams {
   days: number;
   hideBorder: boolean;
   borderRadius: number;
+  cardWidth: number | undefined;
   title: string | undefined;
 }
 
@@ -55,6 +57,7 @@ export function parseActivityParams(q: URLSearchParams): ActivityParams {
     days,
     hideBorder: parseBool(q.get('hide_border') ?? undefined, false),
     borderRadius,
+    cardWidth: parseCardWidth(q.get('card_width') ?? undefined),
     title: title ? title.slice(0, 60) : undefined,
   };
 }
@@ -66,6 +69,7 @@ export function activityCacheKey(p: ActivityParams): string {
     `days=${p.days}`,
     `border=${p.hideBorder ? 0 : 1}`,
     `radius=${p.borderRadius}`,
+    `w=${p.cardWidth ?? ''}`,
     `title=${p.title ?? ''}`,
   ];
   for (const [k, v] of Object.entries(p.overrides)) {

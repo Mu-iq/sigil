@@ -27,6 +27,7 @@ async function buildWrappedSvg(
     login: params.username,
     hideBorder: params.hideBorder,
     borderRadius: params.borderRadius,
+    width: params.cardWidth,
   });
 }
 

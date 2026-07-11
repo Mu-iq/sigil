@@ -1,5 +1,6 @@
 import type { ThemeOverrides } from '../../themes/index.js';
 import { normalizeTimeZone } from '../../util/date.js';
+import { parseCardWidth } from '../common-params.js';
 import { ParamError } from '../params-error.js';
 
 export interface StreakParams {
@@ -10,6 +11,7 @@ export interface StreakParams {
   timeZone: string;
   hideBorder: boolean;
   borderRadius: number;
+  cardWidth: number | undefined;
 }
 
 const USERNAME_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
@@ -47,6 +49,7 @@ export function parseStreakParams(q: URLSearchParams): StreakParams {
     timeZone: normalizeTimeZone(q.get('tz') ?? q.get('timezone') ?? undefined),
     hideBorder: parseBool(q.get('hide_border') ?? undefined, false),
     borderRadius,
+    cardWidth: parseCardWidth(q.get('card_width') ?? undefined),
   };
 }
 
@@ -57,6 +60,7 @@ export function streakCacheKey(p: StreakParams): string {
     `tz=${p.timeZone}`,
     `border=${p.hideBorder ? 0 : 1}`,
     `radius=${p.borderRadius}`,
+    `w=${p.cardWidth ?? ''}`,
   ];
   for (const [k, v] of Object.entries(p.overrides)) {
     if (v) parts.push(`${k}=${v}`);

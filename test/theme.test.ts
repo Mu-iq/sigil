@@ -37,7 +37,7 @@ describe('parseBackground', () => {
 describe('resolveTheme', () => {
   it('falls back to default for an unknown theme name', () => {
     const t = resolveTheme('does-not-exist');
-    expect(t.titleColor).toBe('#58a6ff');
+    expect(t.titleColor).toBe('#79c0ff');
   });
 
   it('applies valid overrides and ignores invalid ones', () => {

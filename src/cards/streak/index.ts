@@ -23,6 +23,7 @@ async function buildStreakSvg(
   return renderStreakCard(model, theme, {
     hideBorder: params.hideBorder,
     borderRadius: params.borderRadius,
+    width: params.cardWidth,
   });
 }
 

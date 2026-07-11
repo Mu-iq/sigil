@@ -27,6 +27,7 @@ async function buildActivitySvg(
     title: params.title ?? `${params.username}'s Contribution Activity`,
     hideBorder: params.hideBorder,
     borderRadius: params.borderRadius,
+    width: params.cardWidth,
   });
 }
 

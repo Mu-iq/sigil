@@ -10,12 +10,12 @@ export interface TrendsRenderOptions {
   metricLabel: string;
   hideBorder: boolean;
   borderRadius: number;
+  width?: number | undefined;
 }
 
-const WIDTH = 495;
+const DEFAULT_WIDTH = 495;
 const HEIGHT = 200;
 const LEFT = 44;
-const RIGHT = WIDTH - 25;
 const TOP = 72;
 const BOTTOM = HEIGHT - 30;
 
@@ -29,8 +29,9 @@ export function renderTrendsCard(
   theme: Theme,
   options: TrendsRenderOptions,
 ): string {
+  const width = options.width ?? DEFAULT_WIDTH;
   const { open, close } = cardFrame({
-    width: WIDTH,
+    width,
     height: HEIGHT,
     theme,
     title: options.title,
@@ -57,11 +58,12 @@ ${close}`;
 
   return `${open}
   ${summary}
-  ${renderLine(series, theme)}
+  ${renderLine(series, theme, width)}
 ${close}`;
 }
 
-function renderLine(series: TrendPoint[], theme: Theme): string {
+function renderLine(series: TrendPoint[], theme: Theme, width: number): string {
+  const RIGHT = width - 25;
   const values = series.map((p) => p.value);
   const min = Math.min(...values);
   const max = Math.max(...values);

@@ -8,24 +8,28 @@ import type { StatsCardModel } from './transform.js';
 export interface RenderOptions {
   hideBorder: boolean;
   borderRadius: number;
+  /** Optional fixed card width in px; defaults to DEFAULT_WIDTH when omitted. */
+  width?: number | undefined;
 }
 
 const PAD_X = 25;
 const HEADER_Y = 33;
 const ROW_START = 66;
 const ROW_H = 28;
-const WIDTH = 467;
+const DEFAULT_WIDTH = 467;
 
 /**
  * Render the stats card to a self-contained SVG string. No external refs, all
  * user-derived text escaped. Layout is hand-authored for tight control and
- * deterministic snapshots.
+ * deterministic snapshots. Width is configurable via `card_width` so cards can
+ * share edges in a README grid.
  */
 export function renderStatsCard(
   model: StatsCardModel,
   theme: Theme,
   options: RenderOptions,
 ): string {
+  const WIDTH = options.width ?? DEFAULT_WIDTH;
   const rows = model.items.length;
   const contentHeight = ROW_START + rows * ROW_H;
   const height = Math.max(contentHeight + 12, model.rank ? 165 : 120);
@@ -53,7 +57,7 @@ export function renderStatsCard(
     })
     .join('\n  ');
 
-  const rankSvg = model.rank ? renderRank(model.rank, theme, height) : '';
+  const rankSvg = model.rank ? renderRank(model.rank, theme, WIDTH, height) : '';
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${height}" viewBox="0 0 ${WIDTH} ${height}" role="img" aria-labelledby="sigil-title sigil-desc">
   <title id="sigil-title">${title}</title>
@@ -71,9 +75,10 @@ export function renderStatsCard(
 function renderRank(
   rank: { level: string; percentile: number },
   theme: Theme,
+  width: number,
   height: number,
 ): string {
-  const cx = WIDTH - 62;
+  const cx = width - 62;
   const cy = height / 2 + 6;
   const r = 38;
   const circumference = 2 * Math.PI * r;
