@@ -1,7 +1,7 @@
 import type { ThemeOverrides } from '../../themes/index.js';
-import { parseCardWidth } from '../common-params.js';
+import { parseCardWidth, parseThemeOverrides } from '../common-params.js';
 import { ParamError } from '../params-error.js';
-import type { LanguagesLayout } from './render.js';
+import type { LanguageColors, LanguagesLayout } from './render.js';
 import type { LanguageWeight } from './types.js';
 
 export interface LanguagesParams {
@@ -11,6 +11,7 @@ export interface LanguagesParams {
   layout: LanguagesLayout;
   weight: LanguageWeight;
   langsCount: number;
+  langColors: LanguageColors;
   excludeRepos: string[] | undefined;
   hideLanguages: string[] | undefined;
   includePrivate: boolean;
@@ -68,6 +69,8 @@ export function parseLanguagesParams(q: URLSearchParams): LanguagesParams {
     : 'normal';
 
   const weight = parseWeight(q.get('weight'));
+  const langColors: LanguageColors =
+    (q.get('lang_colors') ?? '').trim().toLowerCase() === 'mono' ? 'mono' : 'language';
 
   const countRaw = q.get('langs_count');
   const count = countRaw ? Number(countRaw) : 6;
@@ -82,18 +85,11 @@ export function parseLanguagesParams(q: URLSearchParams): LanguagesParams {
   return {
     username,
     theme: (q.get('theme') ?? 'default').trim().toLowerCase(),
-    overrides: {
-      title_color: q.get('title_color') ?? undefined,
-      text_color: q.get('text_color') ?? undefined,
-      muted_color: q.get('muted_color') ?? undefined,
-      icon_color: q.get('icon_color') ?? undefined,
-      bg_color: q.get('bg_color') ?? undefined,
-      border_color: q.get('border_color') ?? undefined,
-      accent_color: q.get('accent_color') ?? undefined,
-    },
+    overrides: parseThemeOverrides(q),
     layout,
     weight,
     langsCount,
+    langColors,
     excludeRepos: parseList(q.get('exclude_repo') ?? undefined),
     hideLanguages: parseList(q.get('hide') ?? undefined),
     includePrivate: parseBool(q.get('include_private') ?? undefined, false),
@@ -110,6 +106,7 @@ export function languagesCacheKey(p: LanguagesParams): string {
     `theme=${p.theme}`,
     `layout=${p.layout}`,
     `weight=${p.weight}`,
+    `colors=${p.langColors}`,
     `n=${p.langsCount}`,
     `xrepo=${(p.excludeRepos ?? [])
       .map((s) => s.toLowerCase())

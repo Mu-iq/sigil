@@ -1,5 +1,5 @@
 import type { ThemeOverrides } from '../../themes/index.js';
-import { parseCardWidth } from '../common-params.js';
+import { parseCardWidth, parseThemeOverrides } from '../common-params.js';
 import { ParamError } from '../params-error.js';
 
 export interface WrappedParams {
@@ -47,15 +47,7 @@ export function parseWrappedParams(
     username,
     year,
     theme: (q.get('theme') ?? 'default').trim().toLowerCase(),
-    overrides: {
-      title_color: q.get('title_color') ?? undefined,
-      text_color: q.get('text_color') ?? undefined,
-      muted_color: q.get('muted_color') ?? undefined,
-      icon_color: q.get('icon_color') ?? undefined,
-      bg_color: q.get('bg_color') ?? undefined,
-      border_color: q.get('border_color') ?? undefined,
-      accent_color: q.get('accent_color') ?? undefined,
-    },
+    overrides: parseThemeOverrides(q),
     hideBorder: parseBool(q.get('hide_border') ?? undefined, false),
     borderRadius,
     cardWidth: parseCardWidth(q.get('card_width') ?? undefined),

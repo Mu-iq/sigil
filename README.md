@@ -23,7 +23,7 @@ Rendered live from a demo instance — one theme (`github_dark`) and one
 
 <p align="center">
   <img src="https://sigil.muzamiltariq77s.workers.dev/api/stats?username=Mu-iq&theme=github_dark&card_width=450" alt="stats card" width="46%" />
-  <img src="https://sigil.muzamiltariq77s.workers.dev/api/languages?username=Mu-iq&layout=donut&weight=count&theme=github_dark&card_width=450" alt="top languages card" width="46%" />
+  <img src="https://sigil.muzamiltariq77s.workers.dev/api/languages?username=Mu-iq&layout=donut&weight=count&lang_colors=mono&theme=github_dark&card_width=450" alt="top languages card" width="46%" />
 </p>
 <p align="center">
   <img src="https://sigil.muzamiltariq77s.workers.dev/api/streak?username=Mu-iq&theme=github_dark&card_width=450" alt="streak card" width="46%" />
@@ -91,13 +91,14 @@ private.
 
 These work on **all** card endpoints:
 
-| Param           | Default   | Description                                                                                                                                            |
-| --------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `username`      | _(req'd)_ | GitHub login to render.                                                                                                                                |
-| `theme`         | `default` | Built-in theme name (see [Themes](#themes)) or custom colors.                                                                                          |
-| `card_width`    | per-card  | Fixed card width in px, clamped 300–900. Set the **same** value on every card so they line up in a README grid (e.g. `card_width=450` for a 2×2 grid). |
-| `hide_border`   | `false`   | Hide the card border.                                                                                                                                  |
-| `border_radius` | `8`       | Corner radius (0–24).                                                                                                                                  |
+| Param           | Default   | Description                                                                                                                                                         |
+| --------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `username`      | _(req'd)_ | GitHub login to render.                                                                                                                                             |
+| `theme`         | `default` | Built-in theme name (see [Themes](#themes)) or custom colors.                                                                                                       |
+| `accent`        | theme     | Override the theme's single accent (hex, no `#` needed) — recolors every structural element (rings, lines, area fills, big numbers) at once. Alias: `accent_color`. |
+| `card_width`    | per-card  | Fixed card width in px, clamped 300–900. Set the **same** value on every card so they line up in a README grid (e.g. `card_width=450` for a 2×2 grid).              |
+| `hide_border`   | `false`   | Hide the card border.                                                                                                                                               |
+| `border_radius` | `8`       | Corner radius (0–24).                                                                                                                                               |
 
 The per-card options below are in addition to these.
 
@@ -127,19 +128,20 @@ language bytes across them.
 ![Top languages](https://<your-instance>.workers.dev/api/languages?username=Mu-iq&layout=donut&theme=tokyonight)
 ```
 
-| Param             | Default   | Description                                                                                                                                        |
-| ----------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `username`        | _(req'd)_ | GitHub login to render.                                                                                                                            |
-| `theme`           | `default` | Built-in theme name (see [Themes](#themes)).                                                                                                       |
-| `layout`          | `normal`  | `normal` (bars), `compact` (stacked bar + legend), or `donut` (ring).                                                                              |
-| `weight`          | `count`   | `count` = repos each language appears in (default; avoids one huge file skewing everything); `bytes` = raw code size; `hybrid` = blend of the two. |
-| `langs_count`     | `6`       | Max languages before the rest collapse into "Other" (1–12).                                                                                        |
-| `hide`            | –         | Comma list of language names to hide (e.g. `hide=html,css`).                                                                                       |
-| `exclude_repo`    | –         | Comma list of repo names to exclude from the aggregate.                                                                                            |
-| `include_private` | `false`   | Include private repos' languages (needs a token that can see them).\*\*                                                                            |
-| `hide_border`     | `false`   | Hide the card border.                                                                                                                              |
-| `border_radius`   | `8`       | Corner radius (0–24).                                                                                                                              |
-| `title`           | –         | Custom card title (max 60 chars).                                                                                                                  |
+| Param             | Default    | Description                                                                                                                                        |
+| ----------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `username`        | _(req'd)_  | GitHub login to render.                                                                                                                            |
+| `theme`           | `default`  | Built-in theme name (see [Themes](#themes)).                                                                                                       |
+| `layout`          | `normal`   | `normal` (bars), `compact` (stacked bar + legend), or `donut` (ring).                                                                              |
+| `weight`          | `count`    | `count` = repos each language appears in (default; avoids one huge file skewing everything); `bytes` = raw code size; `hybrid` = blend of the two. |
+| `lang_colors`     | `language` | `language` = each language's brand color; `mono` = shades of the theme accent (all-one-color, matches the rest of the cards).                      |
+| `langs_count`     | `6`        | Max languages before the rest collapse into "Other" (1–12).                                                                                        |
+| `hide`            | –          | Comma list of language names to hide (e.g. `hide=html,css`).                                                                                       |
+| `exclude_repo`    | –          | Comma list of repo names to exclude from the aggregate.                                                                                            |
+| `include_private` | `false`    | Include private repos' languages (needs a token that can see them).\*\*                                                                            |
+| `hide_border`     | `false`    | Hide the card border.                                                                                                                              |
+| `border_radius`   | `8`        | Corner radius (0–24).                                                                                                                              |
+| `title`           | –          | Custom card title (max 60 chars).                                                                                                                  |
 
 \*\* Language stats reflect the bytes in _your own_ repos, not contributions to
 others — a GitHub API limitation shared by every tool in this category.

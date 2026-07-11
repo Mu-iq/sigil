@@ -38,6 +38,7 @@ async function buildLanguagesSvg(
     hideBorder: params.hideBorder,
     borderRadius: params.borderRadius,
     width: params.cardWidth,
+    langColors: params.langColors,
   });
 }
 

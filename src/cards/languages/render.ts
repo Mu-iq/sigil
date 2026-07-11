@@ -1,10 +1,14 @@
 import { FONT_STACK } from '../../render/constants.js';
 import { cardFrame } from '../../render/frame.js';
+import { accentShades } from '../../render/shades.js';
 import type { Theme } from '../../themes/index.js';
 import { escapeXml } from '../../util/xml.js';
 import type { LanguagesModel } from './transform.js';
 
 export type LanguagesLayout = 'normal' | 'compact' | 'donut';
+
+/** `language` = per-language brand colors (rainbow); `mono` = accent shades. */
+export type LanguageColors = 'language' | 'mono';
 
 export interface LanguagesRenderOptions {
   layout: LanguagesLayout;
@@ -12,6 +16,24 @@ export interface LanguagesRenderOptions {
   hideBorder: boolean;
   borderRadius: number;
   width?: number | undefined;
+  /** How to color the slices/legend. */
+  langColors?: LanguageColors | undefined;
+}
+
+/**
+ * Build the per-slice color list. In `mono` mode every slice (and its legend
+ * dot) becomes a shade of the theme accent, so the card reads as one color
+ * family; otherwise each language keeps its own brand color.
+ */
+function sliceColors(
+  model: LanguagesModel,
+  theme: Theme,
+  opts: LanguagesRenderOptions,
+): string[] {
+  if (opts.langColors === 'mono') {
+    return accentShades(theme.accentColor, model.slices.length);
+  }
+  return model.slices.map((s) => s.color);
 }
 
 const PAD = 25;
@@ -68,6 +90,7 @@ function renderNormal(
   const height = top + model.slices.length * rowH + 5;
   const { open, close } = frameFor(theme, options, width, height);
   const barW = width - PAD * 2;
+  const colors = sliceColors(model, theme, options);
 
   const rows = model.slices
     .map((s, i) => {
@@ -77,7 +100,7 @@ function renderNormal(
     <text x="${PAD}" y="${y}" font-family="${FONT_STACK}" font-size="13" font-weight="600" fill="${theme.textColor}">${escapeXml(s.name)}</text>
     <text x="${width - PAD}" y="${y}" text-anchor="end" font-family="${FONT_STACK}" font-size="12" fill="${theme.mutedColor}">${s.percentage}%</text>
     <rect x="${PAD}" y="${y + 8}" width="${barW}" height="8" rx="4" fill="${theme.borderColor}"/>
-    <rect x="${PAD}" y="${y + 8}" width="${filled.toFixed(1)}" height="8" rx="4" fill="${s.color}"/>
+    <rect x="${PAD}" y="${y + 8}" width="${filled.toFixed(1)}" height="8" rx="4" fill="${colors[i]}"/>
   </g>`;
     })
     .join('\n  ');
@@ -98,13 +121,14 @@ function renderCompact(
   const rowsPerCol = Math.ceil(model.slices.length / 2);
   const height = legendTop + rowsPerCol * 22 + 5;
   const { open, close } = frameFor(theme, options, width, height);
+  const colors = sliceColors(model, theme, options);
 
   // Stacked segments across one rounded bar.
   let x = PAD;
   const segments = model.slices
-    .map((s) => {
+    .map((s, i) => {
       const w = (s.percentage / 100) * barW;
-      const seg = `<rect x="${x.toFixed(2)}" y="${barY}" width="${Math.max(0, w).toFixed(2)}" height="10" fill="${s.color}"/>`;
+      const seg = `<rect x="${x.toFixed(2)}" y="${barY}" width="${Math.max(0, w).toFixed(2)}" height="10" fill="${colors[i]}"/>`;
       x += w;
       return seg;
     })
@@ -117,7 +141,7 @@ function renderCompact(
       const lx = PAD + col * (barW / 2);
       const ly = legendTop + row * 22;
       return `<g transform="translate(${lx}, ${ly})">
-    <circle cx="6" cy="-4" r="5" fill="${s.color}"/>
+    <circle cx="6" cy="-4" r="5" fill="${colors[i]}"/>
     <text x="18" y="0" font-family="${FONT_STACK}" font-size="12" fill="${theme.textColor}">${escapeXml(s.name)} ${s.percentage}%</text>
   </g>`;
     })
@@ -145,12 +169,13 @@ function renderDonut(
   const rowsH = model.slices.length * 22;
   const height = Math.max(190, 70 + rowsH);
   const { open, close } = frameFor(theme, options, width, height);
+  const colors = sliceColors(model, theme, options);
 
   let offset = 0;
   const arcs = model.slices
-    .map((s) => {
+    .map((s, i) => {
       const len = (s.percentage / 100) * circumference;
-      const arc = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="${stroke}"
+      const arc = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colors[i]}" stroke-width="${stroke}"
       stroke-dasharray="${len.toFixed(2)} ${(circumference - len).toFixed(2)}"
       stroke-dashoffset="${(-offset).toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"/>`;
       offset += len;
@@ -165,7 +190,7 @@ function renderDonut(
     .map((s, i) => {
       const ly = 60 + i * 22;
       return `<g transform="translate(${legendX}, ${ly})">
-    <circle cx="6" cy="-4" r="5" fill="${s.color}"/>
+    <circle cx="6" cy="-4" r="5" fill="${colors[i]}"/>
     <text x="18" y="0" font-family="${FONT_STACK}" font-size="12" fill="${theme.textColor}">${escapeXml(s.name)}</text>
     <text x="${width - legendX - PAD}" y="0" text-anchor="end" font-family="${FONT_STACK}" font-size="12" fill="${theme.mutedColor}">${s.percentage}%</text>
   </g>`;

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderLanguagesCard } from '../src/cards/languages/render.js';
 import type { LanguagesModel } from '../src/cards/languages/transform.js';
+import { accentShades } from '../src/render/shades.js';
 import { resolveTheme } from '../src/themes/index.js';
 
 const MODEL: LanguagesModel = {
@@ -56,5 +57,37 @@ describe('renderLanguagesCard', () => {
     );
     expect(svg.startsWith('<svg')).toBe(true);
     expect(svg).toContain('No public language data');
+  });
+});
+
+describe('renderLanguagesCard lang_colors=mono', () => {
+  const theme = resolveTheme('github_dark'); // accent #79c0ff
+  const shades = accentShades(theme.accentColor, MODEL.slices.length);
+
+  for (const layout of ['normal', 'compact', 'donut'] as const) {
+    it(`${layout}: slices use accent shades, not per-language rainbow`, () => {
+      const svg = renderLanguagesCard(MODEL, theme, {
+        layout,
+        title: 'Top Languages',
+        hideBorder: false,
+        borderRadius: 8,
+        langColors: 'mono',
+      }).toLowerCase();
+
+      // Original per-language brand fills must be gone (these hexes are unique
+      // to the slices; muted text color is asserted separately elsewhere).
+      expect(svg).not.toContain('#3178c6'); // TypeScript blue
+      expect(svg).not.toContain('#00add8'); // Go cyan
+      // Every slice is a shade of the accent.
+      for (const shade of shades) {
+        expect(svg).toContain(shade.toLowerCase());
+      }
+    });
+  }
+
+  it('language mode keeps the per-language brand colors (default)', () => {
+    const svg = renderLanguagesCard(MODEL, theme, OPTS('donut'));
+    expect(svg).toContain('#3178c6');
+    expect(svg).toContain('#00add8');
   });
 });
