@@ -6,17 +6,34 @@ consistent theme system. Self-hostable on the edge (Cloudflare Workers).
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Mu-iq/sigil)
 
-> **Status: M4 (in progress).** All eight card types — stats, top-languages,
-> streak, activity, trends, wrapped, and the (opt-in) AI developer summary —
-> historical snapshots (D1 + cron), the theme library, token pool, KV caching,
-> the never-broken-image fallback, the **visual configurator**, and the **GitHub
-> Action deploy mode** are in place and runnable. Remaining M4 polish: screenshots
-> and a public demo instance — see [Roadmap](#roadmap).
+> **Status: M4 (done).** All eight card types — stats, top-languages, streak,
+> activity, trends, wrapped, and the (opt-in) AI developer summary — historical
+> snapshots (D1 + cron), the theme library, token pool, KV caching, the
+> never-broken-image fallback, the **visual configurator**, the **GitHub Action
+> deploy mode**, one-click deploy, CI, and a **live demo instance** are all in
+> place. See the [live examples](#live-examples) above.
 
 **Build your card by clicking** — the [visual configurator](configurator/) gives
 a live preview, theme picker, and copy-ready snippets. Two ways to ship:
 a [self-hosted Worker](docs/self-hosting.md) or a
 [GitHub Action](action/) that commits static SVGs (cards that can never break).
+
+## Live examples
+
+Rendered live from a demo instance:
+
+<p align="center">
+  <img src="https://sigil.muzamiltariq77s.workers.dev/api/stats?username=Mu-iq&theme=tokyonight" alt="stats card" width="46%" />
+  <img src="https://sigil.muzamiltariq77s.workers.dev/api/languages?username=Mu-iq&layout=donut&theme=tokyonight" alt="top languages card" width="46%" />
+</p>
+<p align="center">
+  <img src="https://sigil.muzamiltariq77s.workers.dev/api/streak?username=Mu-iq&theme=dracula" alt="streak card" width="46%" />
+  <img src="https://sigil.muzamiltariq77s.workers.dev/api/activity?username=Mu-iq&theme=radical&days=60" alt="activity graph" width="46%" />
+  <img src="https://sigil.muzamiltariq77s.workers.dev/api/wrapped?username=Mu-iq&theme=catppuccin" alt="wrapped card" width="46%" />
+</p>
+
+_(A shared demo instance — please self-host for your own profile so your rate
+limit stays yours.)_
 
 ---
 
@@ -278,9 +295,8 @@ invariants every change must uphold (chiefly: never return a broken image).
 - **M3 — Signature features (done):** D1 historical snapshots + cron; trend
   cards; "Year in Review / Wrapped"; precomputed AI developer summary
   (pluggable provider).
-- **M4 — Adoption (in progress):** visual configurator ✓, GitHub Action deploy
-  mode ✓, one-click deploy ✓, CI ✓, comparison table ✓. Remaining: screenshots
-  and a public demo instance.
+- **M4 — Adoption (done):** visual configurator ✓, GitHub Action deploy mode ✓,
+  one-click deploy ✓, CI ✓, comparison table ✓, live demo instance ✓.
 
 ---
 

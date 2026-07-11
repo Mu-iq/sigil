@@ -202,10 +202,15 @@
     <div class="wrap">
       <div class="panel">
         <label for="base">sigil instance URL</label>
-        <input id="base" type="text" placeholder="https://sigil.<you>.workers.dev" />
+        <input
+          id="base"
+          type="text"
+          value="https://sigil.muzamiltariq77s.workers.dev"
+          placeholder="https://sigil.<you>.workers.dev"
+        />
         <div class="hint">
-          Point this at your self-hosted instance (or http://127.0.0.1:8787 for local
-          dev). The preview loads live from it.
+          Defaults to the demo instance. Point it at your own self-hosted instance (or
+          http://127.0.0.1:8787 for local dev). The preview loads live from it.
         </div>
 
         <label for="username">GitHub username</label>
@@ -366,7 +371,7 @@
 
       function buildUrl(card, params) {
         const base = (
-          $('base').value.trim() || 'https://sigil.example.workers.dev'
+          $('base').value.trim() || 'https://sigil.muzamiltariq77s.workers.dev'
         ).replace(/\/$/, '');
         return `${base}/api/${card}?${params.toString()}`;
       }
