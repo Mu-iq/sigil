@@ -22,16 +22,16 @@ cadence: cards update on the workflow schedule, not on every profile view.
 
 ## Configuration (env vars)
 
-| Var                | Default                     | Description                                              |
-| ------------------ | --------------------------- | -------------------------------------------------------- |
-| `SIGIL_USERNAME`   | _(required)_                | GitHub login to render.                                  |
-| `GITHUB_TOKEN`     | _(required)_                | Token; `GH_TOKEN` / `PAT_1` also accepted. Use a PAT with `repo` for private stats. |
-| `SIGIL_CARDS`      | `stats,languages,streak,activity` | Comma list: `stats`, `languages`, `streak`, `activity`, `wrapped`. |
-| `SIGIL_THEME`      | `default`                   | Any built-in theme name.                                 |
-| `SIGIL_OUT`        | `sigil-cards`               | Output directory for the `.svg` files.                   |
-| `SIGIL_TZ`         | `UTC`                       | Timezone for the streak card's day boundaries.           |
-| `SIGIL_LANG_LAYOUT`| `compact`                   | Languages layout: `normal`, `compact`, `donut`.          |
-| `SIGIL_TIMEOUT_MS` | `10000`                     | Per-GitHub-call timeout.                                 |
+| Var                 | Default                           | Description                                                                         |
+| ------------------- | --------------------------------- | ----------------------------------------------------------------------------------- |
+| `SIGIL_USERNAME`    | _(required)_                      | GitHub login to render.                                                             |
+| `GITHUB_TOKEN`      | _(required)_                      | Token; `GH_TOKEN` / `PAT_1` also accepted. Use a PAT with `repo` for private stats. |
+| `SIGIL_CARDS`       | `stats,languages,streak,activity` | Comma list: `stats`, `languages`, `streak`, `activity`, `wrapped`.                  |
+| `SIGIL_THEME`       | `default`                         | Any built-in theme name.                                                            |
+| `SIGIL_OUT`         | `sigil-cards`                     | Output directory for the `.svg` files.                                              |
+| `SIGIL_TZ`          | `UTC`                             | Timezone for the streak card's day boundaries.                                      |
+| `SIGIL_LANG_LAYOUT` | `compact`                         | Languages layout: `normal`, `compact`, `donut`.                                     |
+| `SIGIL_TIMEOUT_MS`  | `10000`                           | Per-GitHub-call timeout.                                                            |
 
 Only live-data cards are available in Action mode. `trends` and `summary` require
 the snapshot/AI pipeline and are Worker-only.
